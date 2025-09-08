@@ -17,9 +17,12 @@ export interface FixedVhPolyfillState {
     svh: number;
     lvhPropertyName: string;
     svhPropertyName: string;
-    resizeTimeout?: number | null;
+
     scrollTimeout?: number;
+    touchTimeout?: number;
     touchScrollTimeout?: number;
+    rAf: number | null;
+
     isTouchScrolling?: boolean;
     isScrolling?: boolean;
     isTouching?: boolean;
