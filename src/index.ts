@@ -1,1 +1,0 @@
-export { FixedVhPolyfill, state } from './core';
