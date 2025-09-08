@@ -54,9 +54,9 @@ const toPx = (cssValue, method = 'computed', isInt = false) => {
  * - `RESIZE` (100ms): A shorter value for a more agile response to environmental changes like device orientation or window resizing.
  */
 const DEBOUNCE_MS = {
-    SCROLL_END: 200,
+    SCROLL_END: 100,
+    TOUCH_END: 200,
     TOUCH_SCROLL_END: 200,
-    RESIZE: 100,
 };
 /**
  * Core logic for state management through raw event handlers.
@@ -96,38 +96,37 @@ const handlers = {
     },
     touchStart: () => {
         const state = FixedVhPolyfill.state;
-        if (state.touchScrollTimeout)
-            clearTimeout(state.touchScrollTimeout);
+        if (state.touchTimeout)
+            clearTimeout(state.touchTimeout);
         state.isTouching = true;
     },
     touchEnd: () => {
         const state = FixedVhPolyfill.state;
-        if (state.touchScrollTimeout)
-            clearTimeout(state.touchScrollTimeout);
-        state.isTouching = false;
+        if (state.touchTimeout)
+            clearTimeout(state.touchTimeout);
+        state.touchTimeout = window.setTimeout(() => {
+            state.isTouching = false;
+            if (!state.isScrolling) {
+                state.isTouchScrolling = false;
+            }
+        }, DEBOUNCE_MS.TOUCH_END);
         // 터치 스크롤이 끝났을 때만 측정
         if (state.isTouchScrolling) {
             FixedVhPolyfill._measureAndCheck();
-            state.touchScrollTimeout = window.setTimeout(() => {
-                state.isTouchScrolling = false;
-            }, DEBOUNCE_MS.TOUCH_SCROLL_END);
         }
     },
-    resize: () => {
+    touchMove: () => {
         const state = FixedVhPolyfill.state;
-        state.resizeTimeout = window.setTimeout(() => {
-            FixedVhPolyfill.refreshDimensions();
-        }, DEBOUNCE_MS.RESIZE);
+        if (state.touchTimeout)
+            clearTimeout(state.touchTimeout);
+        state.isTouching = true;
+    },
+    resize: () => {
+        FixedVhPolyfill.refreshDimensions();
     },
     orientation: () => {
         FixedVhPolyfill.refreshDimensions(true);
     },
-    touchMove: () => {
-        const state = FixedVhPolyfill.state;
-        if (state.touchScrollTimeout)
-            clearTimeout(state.touchScrollTimeout);
-        state.isTouching = true;
-    }
 };
 /**
  * StableScroll instance that provides stable viewport height values
@@ -138,8 +137,9 @@ const state = {
     svh: 0,
     lvhPropertyName: '--lvh',
     svhPropertyName: '--svh',
-    resizeTimeout: null,
+    rAf: null,
     scrollTimeout: undefined,
+    touchTimeout: undefined,
     touchScrollTimeout: undefined,
     isScrolling: false,
     isTouching: false,
@@ -181,11 +181,9 @@ const FixedVhPolyfill = {
             this.updateViewportHeight(true);
             return;
         }
-        if (this.state.resizeTimeout)
-            clearTimeout(this.state.resizeTimeout);
-        this.state.resizeTimeout = window.setTimeout(() => {
-            this.updateViewportHeight(false);
-        }, DEBOUNCE_MS.RESIZE);
+        if (this.state.rAf)
+            cancelAnimationFrame(this.state.rAf);
+        this.state.rAf = requestAnimationFrame(() => this.updateViewportHeight(false));
     },
     /**
      * Updates the CSS variables for viewport height.
@@ -212,7 +210,7 @@ const FixedVhPolyfill = {
         // causing the viewport height to change. By only applying "safe" updates while scrolling,
         // we avoid the jarring visual flicker. "Safe" updates mean only allowing lvh to grow and
         // svh to shrink, which corresponds to the address bar hiding (more space) and showing (less space).
-        if (this.state.isScrolling || this.state.isTouchScrolling) {
+        if (this.state.isTouchScrolling) {
             if (this.state.lvh < newLvh) {
                 setVar(this.state.lvhPropertyName, newLvh);
             }
@@ -242,12 +240,12 @@ const FixedVhPolyfill = {
                 if (!isNeeded) {
                     this.cleanup();
                 }
-                return; // Stop further execution
             }
             else {
                 this.state.isModuleNeeded = null;
                 // If no stored value, continue to the measurement logic below.
             }
+            return; // Stop further execution
         }
         // This part will now only run if it's the first time (no localStorage value)
         // and the initial measurements are being taken.
@@ -352,6 +350,7 @@ const FixedVhPolyfill = {
      * @returns void
      */
     cleanup() {
+        this.clearTimeouts();
         window.removeEventListener('load', handlers.load);
         window.removeEventListener('scroll', handlers.scroll);
         window.removeEventListener('touchstart', handlers.touchStart);
@@ -367,25 +366,79 @@ const FixedVhPolyfill = {
      * @returns void
      */
     clearTimeouts() {
-        if (this.state.resizeTimeout)
-            clearTimeout(this.state.resizeTimeout);
         if (this.state.scrollTimeout)
             clearTimeout(this.state.scrollTimeout);
+        if (this.state.touchTimeout)
+            clearTimeout(this.state.touchTimeout);
         if (this.state.touchScrollTimeout)
             clearTimeout(this.state.touchScrollTimeout);
-        this.state.resizeTimeout = null;
+        if (this.state.rAf)
+            cancelAnimationFrame(this.state.rAf);
+        this.state.rAf = null;
         this.state.scrollTimeout = undefined;
+        this.state.touchTimeout = undefined;
         this.state.touchScrollTimeout = undefined;
     },
     createDebugContainer() {
         const containerHTML = `
-		    <div id="log-container" style="position: fixed; bottom: 1rem; left: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 300px; height: 200px; overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all;">
+		    <div id="log-container">
 				<h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">Log</h4>
-				<ul id="log-list" style="flex-grow: 1; overflow-y: auto; padding-right: 0.5rem;"></ul>
-			</div>`;
+				<div id="status" style="display: flex; flex-direction: column; font-size: 0.6rem; margin-top: 0.5rem; gap: 0.2rem;">
+					<span>isModuleNeeded: ${this.state.isModuleNeeded}</span>
+					<span>isDetectionComplete: ${this.state.isDetectionComplete}</span>
+					<span>isTouching: ${this.state.isTouching}</span>
+					<span>isTouchScrolling: ${this.state.isTouchScrolling}</span>
+					<span>isScrolling: ${this.state.isScrolling}</span>
+					<span>lvh: ${this.state.lvh}</span>
+					<span>svh: ${this.state.svh}</span>
+				</div>
+				<ul id="log-list" style="flex-grow: 1; overflow-y: auto; padding-right: 0.5rem; display:flex; flex-direction:column;"></ul>
+				<button id="local-storage-clear-btn"">Clear localStorage</button>
+				<button id="close-log-btn">Close</button>
+				<button id="open-log-btn">Log</button>
+			</div>
+			
+			<style>
+				#log-container {
+					position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 50%; height: calc(50 * var(--svh, 1vh)); overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all;
+					button { background: #555; color: white; cursor: pointer;   font-size: 0.5rem; }
+					button#close-log-btn { position:absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.5rem; border: none; border-radius: 5px; background: #555; color: white; cursor: pointer;}
+					button#open-log-btn { background: transparent; display:none; position:absolute; top:0; left:0; width:100%; height:100%; align-items: center; justify-content: center;}
+					button#local-storage-clear-btn { padding: 0.25rem 0.5rem;border: none; border-radius: 5px; }
+					&.hide {
+					 width: 2rem; height: 2rem; padding: 0; border-radius: 50%;
+					 > * { opacity: 0; padding: 0; margin: 0; height: 0; overflow: hidden; }
+					 > button#open-log-btn { display: flex; opacity: 1;  position: absolute; top: 0; right: 0; width: 100%; height: 100%; border-radius: 50%; }
+					}
+				}
+			</style>
+		`;
         if (!document.getElementById('log-container')) {
             document.body.insertAdjacentHTML('beforeend', containerHTML);
         }
+        const clearBtn = document.getElementById('local-storage-clear-btn');
+        const closeBtn = document.getElementById('close-log-btn');
+        const openBtn = document.getElementById('open-log-btn');
+        const logContainer = document.getElementById('log-container');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                const logContainer = document.getElementById('log-container');
+                if (logContainer) {
+                    logContainer.classList.add('hide');
+                }
+            });
+        }
+        if (clearBtn) {
+            clearBtn.addEventListener('click', () => {
+                window.localStorage.removeItem('fixedVhPolyfill_isModuleNeeded');
+                window.location.reload();
+            });
+        }
+        openBtn === null || openBtn === void 0 ? void 0 : openBtn.addEventListener('click', () => {
+            if (logContainer === null || logContainer === void 0 ? void 0 : logContainer.classList.contains('hide')) {
+                logContainer === null || logContainer === void 0 ? void 0 : logContainer.classList.remove('hide');
+            }
+        });
     },
     debug() {
         this.createDebugContainer();
@@ -397,6 +450,20 @@ const FixedVhPolyfill = {
             listItem.textContent = `${message}`;
             logList.appendChild(listItem);
             logList.scrollTop = logList.scrollHeight;
+        };
+        const updateStatus = () => {
+            const status = document.getElementById('status');
+            if (status) {
+                status.innerHTML = `
+					<span>isModuleNeeded: ${this.state.isModuleNeeded}</span>
+					<span>isDetectionComplete: ${this.state.isDetectionComplete}</span>
+					<span>isTouching: ${this.state.isTouching}</span>
+					<span>isTouchScrolling: ${this.state.isTouchScrolling}</span>
+					<span>isScrolling: ${this.state.isScrolling}</span>
+					<span>lvh: ${this.state.lvh}</span>
+					<span>svh: ${this.state.svh}</span>
+				`;
+            }
         };
         // proxy state
         const selectedProp = 'detectionCount'; // 원하는 프로퍼티명으로 변경
@@ -412,6 +479,7 @@ const FixedVhPolyfill = {
                 }
                 // @ts-ignore
                 target[prop] = value;
+                updateStatus();
                 return true;
             }
         });
