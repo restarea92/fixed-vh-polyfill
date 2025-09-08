@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stable Scroll VH Test</title>
+    <script type="module">
+        import { FixedVhPolyfill, state } from '../src/index.ts';
+
+        function debug() {
+            const printValues = document.querySelector('.print-values');
+            const updateValues = () => {
+                printValues.children[0].innerHTML = `Browser 1lvh value: ${window.innerHeight / 100}px`;
+                printValues.children[1].innerHTML = `Browser 1svh value: ${window.visualViewport ? window.visualViewport.height / 100 : 'N/A'}px`;
+                printValues.children[2].innerHTML = `Module fixed 1lvh value: ${state.lvh}px`;
+                printValues.children[3].innerHTML = `Module fixed 1svh value: ${state.svh}px`;
+            };
+            const testSection = document.getElementById('test-section');
+            
+            const items = testSection.querySelectorAll('.item');
+            items.forEach(item => {
+                const info = item.querySelector('.item-info');
+                const heightValue = item.style.height;
+                info.innerHTML = `CSS Height: ${heightValue}`;
+            });
+             
+            const resizeObserver = new ResizeObserver(entries => {   
+                updateValues();
+                for (let entry of entries) {
+                    const target = entry.target;
+                    const height = target.querySelector('.item-height');
+                    height.innerHTML = `<span>offsetHeight: ${target.offsetHeight}px</span> <span>Computed: ${getComputedStyle(target).height}</span>`;
+                }
+            });
+
+            items.forEach(item => {
+                resizeObserver.observe(item);
+            });
+
+        }
+        window.addEventListener('DOMContentLoaded', () => {
+            // Initialize stable scroll
+            const options = {
+                debugMode: true, // Enable debug mode to create log container
+            };
+            FixedVhPolyfill.init(options);
+
+            // Debug function
+            debug();
+        });
+    </script>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+</head>
+<body>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html {
+            width: 100%;
+            min-height: calc(300 * var(--lvh));
+            overflow-x: clip;
+            margin: 0;
+            font-size:16px;
+        }
+        body {
+            margin: 0;
+            overflow-x: clip;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            height: fit-content;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4) no-repeat;
+            font-family: "Pretendard", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+        }
+        h3 {
+            margin-top: 2rem;
+        }
+        p {
+            margin-top: 0.5rem;
+            line-height: 1.25;
+        }
+        li {
+            list-style: none;
+            padding-left: 0.5rem;
+        }
+        section {
+            width: fit-content;
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding: 0 1rem;
+        }
+        section.active {
+            width: 100%;
+            padding: 1rem;
+            display: flex;
+            gap:1rem;
+            flex-direction: column;
+            .item {
+                --box-height: calc(var(--lvh) * 100);
+                border-radius: 1rem;
+                width: 100%;
+                height: var(--box-height);
+                background-color: rgba(255, 255, 255, 0.5);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+                &::after {
+                    content: "100lvh";
+                }
+            }
+        }
+        .container {
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 1rem;
+            .item {
+                padding: 1rem;
+                display: flex;
+                align-items: flex-start;
+                border: 2px solid #000;
+                background: white;
+                position: relative;
+                line-height: 1;
+                font-size: 0.75rem;
+                display: flex;
+                width: fit-content;
+                height: fit-content;
+                &::before {
+                    margin-top: 0;
+                    font-size: 2rem;
+                    content: '⇧';
+                    position: absolute;
+                    top: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+                &::after {
+                    margin-top: 0;
+                    font-size: 2rem;
+                    content: '⇩';
+                    position: absolute;
+                    bottom: 0;
+                    left: 50%;
+                    transform: translateX(-50%);
+                }
+                > div {
+                    font-style: italic;
+                    writing-mode: vertical-lr;
+                    width: fit-content;
+                    top: 100%;
+                    bottom: 1rem;
+                    left: 0;
+                    display: flex;
+                    align-items: center;
+                    gap:0.5rem;
+                    margin-top: 2rem;
+                    margin-bottom: 2rem;
+                    position: sticky;
+                    > span {
+                        white-space: nowrap;
+                        font-weight: bold;
+                        &.item-height {
+                            font-weight: bold;
+                            color:red;
+                            display: flex;
+                            gap:0.25rem;
+                            flex-direction: column;
+                        }
+                    }
+                }
+            }
+        }
+
+        .true span {
+            color: green;
+            font-weight: bold;
+        }
+        
+    </style>
+
+    <div style="padding: 1rem; margin:1rem auto 0; background: rgba(255,255,255,0.9); border-radius: 10px; width: calc(100% - 2rem);">
+        <h1>Stable Scroll VH Test</h1>
+        <p>This page tests the stable operation of a module that fixes viewport height units (lvh, svh) in certain iOS in-app browsers, Firefox, and Arc Browser.</p>
+        
+        <h3>Problem</h3>
+        <p>Some browsers treat lvh, svh, and dvh values identically or with incorrect values during initial loading.</p>
+        <p>Specifically, svh values cannot be parsed at load time and are accurately calculated only when the first touch scroll begins.</p>
+        
+        <h3>Test Method</h3>
+        <p><strong>Left two boxes</strong>: Use browser default 100lvh and 100svh values. In problematic iOS browsers, they behave like dvh with variable heights.</p>
+        <p><strong>Right two boxes</strong>: Use CSS variables --lvh and --svh for height settings. The module is applied to maintain stable scroll positions.</p>
+        
+        <h3>Notes</h3>
+        <p>Screen flickering in some browsers appears to be a rendering (painting) issue rather than actual scroll position changes.</p>
+        <p>Currently distinguishes between touch and mouse scrolling by inference, which may not be perfect. Non-touch scrolling assumes viewport size doesn't change.</p>
+    </div>
+    <ul class="print-values" style="position: fixed; bottom: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px; font-size: 0.75rem; z-index: 1000; opacity: 0.75;">
+        <li>
+            브라우저의 1lvh값: --
+        </li>
+        <li>
+            브라우저의 1svh값: --
+        </li>
+        <li>
+            모듈로 고정된 1lvh값: --
+        </li>
+        <li>
+            모듈로 고정된 1svh값: --
+        </li>
+    </ul>
+        
+    <section id="test-section">
+        <div class="container before">
+            <div class="item lvh" style="height: 100lvh;">
+                <div>
+                    <span class="item-info">CSS Height: 100lvh</span>
+                    <span class="item-height"></span>
+                </div>
+            </div>
+            <div class="item svh" style="height: 100svh;">
+                <div>
+                    <span class="item-info">CSS Height: 100svh</span>
+                    <span class="item-height"></span>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <div class="item lvh" style="height: calc(100 * var(--lvh));">
+                <div>
+                    <span class="item-info">CSS Height: calc(100 * var(--lvh));</span>
+                    <span class="item-height"></span>
+                </div>
+            </div>
+            <div class="item svh" style="height: calc(100 * var(--svh));">
+                <div>
+                    <span class="item-info">CSS Height: calc(100 * var(--svh));</span>
+                    <span class="item-height"></span>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="active">
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+        <div class="item"></div>
+    </section>
+</body>
+</html>
