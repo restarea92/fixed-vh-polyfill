@@ -25,25 +25,19 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Build project
-        run: npm run build
-
-      - name: Prepare Demo for Pages
+      - name: Build and Prepare Demo
         run: |
-          # Replace the import path in the demo file to point to the built file
-          sed -i "s|../src/index.ts|../dist/index.mjs|g" demo/index.html
+          npm run build
+          mv dist demo/
+          sed -i 's|../src/index.ts|./dist/index.mjs|g' demo/index.html
           
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: .
+          publish_dir: ./demo
           publish_branch: gh-pages
-          # Keep the history of the gh-pages branch
           keep_files: false
-          # Only deploy the necessary files for the demo
-          # This includes the demo directory, the dist directory, and package.json for context
-          # You can add other root files if your demo needs them
           cname: ''
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
