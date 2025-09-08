@@ -240,13 +240,23 @@
 	            const storedIsModuleNeeded = localStorage.getItem('fixedVhPolyfill_isModuleNeeded');
 	            if (storedIsModuleNeeded !== null) {
 	                this.state.isDetectionComplete = true;
-	                this.state.isModuleNeeded = storedIsModuleNeeded === 'true';
+	                const isNeeded = storedIsModuleNeeded === 'true';
+	                this.state.isModuleNeeded = isNeeded;
+	                // If module is not needed based on stored value, perform cleanup and stop.
+	                if (!isNeeded) {
+	                    this.cleanup();
+	                }
+	                return; // Stop further execution
 	            }
 	            else {
 	                this.state.isModuleNeeded = null;
+	                // If no stored value, continue to the measurement logic below.
 	            }
-	            return;
 	        }
+	        // This part will now only run if it's the first time (no localStorage value)
+	        // and the initial measurements are being taken.
+	        if (this.state.isDetectionComplete)
+	            return;
 	        const { lvhMeasurements, svhMeasurements } = this.state;
 	        const uniqueLvh = new Set(lvhMeasurements);
 	        const uniqueSvh = new Set(svhMeasurements);
@@ -262,8 +272,6 @@
 	        localStorage.setItem('fixedVhPolyfill_isModuleNeeded', String(this.state.isModuleNeeded));
 	        // If the module is not needed, clean up the event listeners to save resources.
 	        if (!this.state.isModuleNeeded) {
-	            document.documentElement.style.setProperty(this.state.lvhPropertyName, `1lvh`);
-	            document.documentElement.style.setProperty(this.state.svhPropertyName, `1svh`);
 	            this.cleanup();
 	        }
 	    },
@@ -348,12 +356,15 @@
 	     * @returns void
 	     */
 	    cleanup() {
+	        window.removeEventListener('load', handlers.load);
 	        window.removeEventListener('scroll', handlers.scroll);
 	        window.removeEventListener('touchstart', handlers.touchStart);
 	        window.removeEventListener('touchend', handlers.touchEnd);
 	        window.removeEventListener('touchmove', handlers.touchMove);
 	        window.removeEventListener('resize', handlers.resize);
 	        window.removeEventListener('orientationchange', handlers.orientation);
+	        document.documentElement.style.setProperty(this.state.lvhPropertyName, `1lvh`);
+	        document.documentElement.style.setProperty(this.state.svhPropertyName, `1svh`);
 	    },
 	    /**
 	     * Clears all active timeouts and resets timeout references.

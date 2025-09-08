@@ -7,46 +7,13 @@
     <script type="module">
         import { FixedVhPolyfill, state } from './dist/index.mjs';
 
-        function debug() {
-            const printValues = document.querySelector('.print-values');
-            const updateValues = () => {
-                printValues.children[0].innerHTML = `Browser 1lvh value: ${window.innerHeight / 100}px`;
-                printValues.children[1].innerHTML = `Browser 1svh value: ${window.visualViewport ? window.visualViewport.height / 100 : 'N/A'}px`;
-                printValues.children[2].innerHTML = `Module fixed 1lvh value: ${state.lvh}px`;
-                printValues.children[3].innerHTML = `Module fixed 1svh value: ${state.svh}px`;
-            };
-            const testSection = document.getElementById('test-section');
-            
-            const items = testSection.querySelectorAll('.item');
-            items.forEach(item => {
-                const info = item.querySelector('.item-info');
-                const heightValue = item.style.height;
-                info.innerHTML = `CSS Height: ${heightValue}`;
-            });
-             
-            const resizeObserver = new ResizeObserver(entries => {   
-                updateValues();
-                for (let entry of entries) {
-                    const target = entry.target;
-                    const height = target.querySelector('.item-height');
-                    height.innerHTML = `<span>offsetHeight: ${target.offsetHeight}px</span> <span>Computed: ${getComputedStyle(target).height}</span>`;
-                }
-            });
 
-            items.forEach(item => {
-                resizeObserver.observe(item);
-            });
-
-        }
         window.addEventListener('DOMContentLoaded', () => {
             // Initialize stable scroll
             const options = {
                 debugMode: true, // Enable debug mode to create log container
             };
             FixedVhPolyfill.init(options);
-
-            // Debug function
-            debug();
         });
     </script>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
@@ -199,20 +166,6 @@
         <p>Screen flickering in some browsers appears to be a rendering (painting) issue rather than actual scroll position changes.</p>
         <p>Currently distinguishes between touch and mouse scrolling by inference, which may not be perfect. Non-touch scrolling assumes viewport size doesn't change.</p>
     </div>
-    <ul class="print-values" style="position: fixed; bottom: 1rem; right: 1rem; background: rgba(255,255,255,0.9); padding: 1rem; border-radius: 10px; font-size: 0.75rem; z-index: 1000; opacity: 0.75;">
-        <li>
-            브라우저의 1lvh값: --
-        </li>
-        <li>
-            브라우저의 1svh값: --
-        </li>
-        <li>
-            모듈로 고정된 1lvh값: --
-        </li>
-        <li>
-            모듈로 고정된 1svh값: --
-        </li>
-    </ul>
         
     <section id="test-section">
         <div class="container before">
