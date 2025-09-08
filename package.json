@@ -1,0 +1,51 @@
+{
+  "name": "fixed-vh-polyfill",
+  "version": "0.1.0",
+  "description": "A Simple JavaScript utility to stabilize viewport height units (svh, lvh) on iOS and prevent scroll jitter. Some iOS in-app browsers or non-Safari browsers may incorrectly interpret svh and lvh similar to dvh, causing layout issues. This module ensures consistent viewport sizing for mobile web apps affected by these quirks. (TypeScript)",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "rollup -c",
+    "test": "echo \"No tests yet\"",
+    "prepublishOnly": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "viewport",
+    "vh",
+    "ios",
+    "typescript",
+    "scroll",
+    "lvh",
+    "svh",
+    "dvh",
+    "in-app browser",
+    "ios in-app browser"
+  ],
+  "author": "Yohan Byun <restarea@me.com>",
+  "license": "MIT",
+  "type": "module",
+  "devDependencies": {
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4",
+    "rollup": "^4.0.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "rollup-plugin-typescript2": "^0.34.1"
+  }
+}
