@@ -49,12 +49,12 @@ const toPx = (cssValue, method = 'computed', isInt = false) => {
  * Debounce times in milliseconds for various events.
  * These values are crucial for determining the 'end' of a user action and preventing event storms.
  * - `SCROLL_END` & `TOUCH_SCROLL_END` (300ms): A standard, stable value to determine when a scroll action has finished.
- * - `RESIZE` (100ms): A shorter value for a more agile response to environmental changes like device orientation or window resizing.
+ * - `RESIZE` (300ms): A shorter value for a more agile response to environmental changes like device orientation or window resizing.
  */
 const DEBOUNCE_MS = {
-    SCROLL_END: 100,
-    TOUCH_END: 200,
-    TOUCH_SCROLL_END: 200,
+    SCROLL_END: 300,
+    TOUCH_SCROLL_END: 300,
+    RESIZE: 300,
 };
 /**
  * Core logic for state management through raw event handlers.
@@ -94,30 +94,18 @@ const handlers = {
     },
     touchStart: () => {
         const state = FixedVhPolyfill.state;
-        if (state.touchTimeout)
-            clearTimeout(state.touchTimeout);
+        if (state.touchScrollTimeout)
+            clearTimeout(state.touchScrollTimeout);
         state.isTouching = true;
     },
     touchEnd: () => {
         const state = FixedVhPolyfill.state;
-        if (state.touchTimeout)
-            clearTimeout(state.touchTimeout);
-        state.touchTimeout = window.setTimeout(() => {
-            state.isTouching = false;
-            if (!state.isScrolling) {
-                state.isTouchScrolling = false;
-            }
-        }, DEBOUNCE_MS.TOUCH_END);
-        // 터치 스크롤이 끝났을 때만 측정
-        if (state.isTouchScrolling) {
-            FixedVhPolyfill._measureAndCheck();
-        }
-    },
-    touchMove: () => {
-        const state = FixedVhPolyfill.state;
-        if (state.touchTimeout)
-            clearTimeout(state.touchTimeout);
-        state.isTouching = true;
+        if (state.touchScrollTimeout)
+            clearTimeout(state.touchScrollTimeout);
+        state.isTouching = false;
+        state.touchScrollTimeout = window.setTimeout(() => {
+            state.isTouchScrolling = false;
+        }, DEBOUNCE_MS.TOUCH_SCROLL_END);
     },
     resize: () => {
         FixedVhPolyfill.refreshDimensions();
@@ -139,6 +127,7 @@ const state = {
     scrollTimeout: undefined,
     touchTimeout: undefined,
     touchScrollTimeout: undefined,
+    resizeTimeout: undefined,
     isScrolling: false,
     isTouching: false,
     isTouchScrolling: false,
@@ -175,13 +164,17 @@ const FixedVhPolyfill = {
                 state.lvhMeasurements = [];
                 state.svhMeasurements = [];
             }
-            this.clearTimeouts();
+            clearTimeout(this.state.resizeTimeout);
             this.updateViewportHeight(true);
             return;
         }
-        if (this.state.rAf)
-            cancelAnimationFrame(this.state.rAf);
-        this.state.rAf = requestAnimationFrame(() => this.updateViewportHeight(false));
+        if (state.rAf)
+            cancelAnimationFrame(state.rAf);
+        if (state.resizeTimeout)
+            clearTimeout(state.resizeTimeout);
+        state.resizeTimeout = window.setTimeout(() => {
+            this.updateViewportHeight(false);
+        }, DEBOUNCE_MS.RESIZE);
     },
     /**
      * Updates the CSS variables for viewport height.
@@ -208,7 +201,8 @@ const FixedVhPolyfill = {
         // causing the viewport height to change. By only applying "safe" updates while scrolling,
         // we avoid the jarring visual flicker. "Safe" updates mean only allowing lvh to grow and
         // svh to shrink, which corresponds to the address bar hiding (more space) and showing (less space).
-        if (this.state.isTouchScrolling) {
+        if (this.state.isTouchScrolling || this.state.isScrolling || this.state.isTouching) {
+            FixedVhPolyfill._measureAndCheck();
             if (this.state.lvh < newLvh) {
                 setVar(this.state.lvhPropertyName, newLvh);
             }
@@ -227,44 +221,52 @@ const FixedVhPolyfill = {
      * @private
      */
     _checkIfModuleIsNeeded(force = false) {
-        const localStorage = window.localStorage;
-        if (force) {
-            const storedIsModuleNeeded = localStorage.getItem('fixedVhPolyfill_isModuleNeeded');
-            if (storedIsModuleNeeded !== null) {
-                this.state.isDetectionComplete = true;
-                const isNeeded = storedIsModuleNeeded === 'true';
-                this.state.isModuleNeeded = isNeeded;
-                // If module is not needed based on stored value, perform cleanup and stop.
-                if (!isNeeded) {
-                    this.cleanup();
+        try {
+            const localStorage = window.localStorage;
+            if (force) {
+                const storedIsModuleNeeded = localStorage.getItem('fixedVhPolyfill_isModuleNeeded');
+                if (storedIsModuleNeeded !== null) {
+                    this.state.isDetectionComplete = true;
+                    const isNeeded = storedIsModuleNeeded === 'true';
+                    this.state.isModuleNeeded = isNeeded;
+                    // If module is not needed based on stored value, perform cleanup and stop.
+                    if (!isNeeded) {
+                        this.cleanup();
+                    }
                 }
+                else {
+                    this.state.isModuleNeeded = null;
+                    // If no stored value, continue to the measurement logic below.
+                }
+                return; // Stop further execution
+            }
+            // This part will now only run if it's the first time (no localStorage value)
+            // and the initial measurements are being taken.
+            if (this.state.isDetectionComplete)
+                return;
+            const { lvhMeasurements, svhMeasurements } = this.state;
+            const uniqueLvh = new Set(lvhMeasurements);
+            const uniqueSvh = new Set(svhMeasurements);
+            // If there's more than one unique value for either lvh or svh,
+            // it means the viewport units are dynamic and the polyfill is needed.
+            if (uniqueLvh.size > 1 || uniqueSvh.size > 1) {
+                this.state.isModuleNeeded = true;
             }
             else {
-                this.state.isModuleNeeded = null;
-                // If no stored value, continue to the measurement logic below.
+                this.state.isModuleNeeded = false;
             }
-            return; // Stop further execution
+            this.state.isDetectionComplete = true;
+            localStorage.setItem('fixedVhPolyfill_isModuleNeeded', String(this.state.isModuleNeeded));
+            // If the module is not needed, clean up the event listeners to save resources.
+            if (!this.state.isModuleNeeded) {
+                this.cleanup();
+            }
         }
-        // This part will now only run if it's the first time (no localStorage value)
-        // and the initial measurements are being taken.
-        if (this.state.isDetectionComplete)
-            return;
-        const { lvhMeasurements, svhMeasurements } = this.state;
-        const uniqueLvh = new Set(lvhMeasurements);
-        const uniqueSvh = new Set(svhMeasurements);
-        // If there's more than one unique value for either lvh or svh,
-        // it means the viewport units are dynamic and the polyfill is needed.
-        if (uniqueLvh.size > 1 || uniqueSvh.size > 1) {
+        catch (e) {
+            console.warn('localStorage not available:', e);
+            // Fallback: assume module is needed if localStorage fails
             this.state.isModuleNeeded = true;
-        }
-        else {
-            this.state.isModuleNeeded = false;
-        }
-        this.state.isDetectionComplete = true;
-        localStorage.setItem('fixedVhPolyfill_isModuleNeeded', String(this.state.isModuleNeeded));
-        // If the module is not needed, clean up the event listeners to save resources.
-        if (!this.state.isModuleNeeded) {
-            this.cleanup();
+            this.state.isDetectionComplete = true;
         }
     },
     /**
@@ -274,7 +276,6 @@ const FixedVhPolyfill = {
      */
     _measureAndCheck() {
         const state = this.state;
-        // 감지가 이미 완료되었다면 아무것도 하지 않습니다.
         if (state.isDetectionComplete)
             return;
         const MAX_DETECTIONS = 10;
@@ -283,7 +284,6 @@ const FixedVhPolyfill = {
         state.lvhMeasurements.push(currentLvh);
         state.svhMeasurements.push(currentSvh);
         state.detectionCount++;
-        // 측정 횟수가 최대치에 도달하면 최종 판정을 내립니다.
         if (state.detectionCount >= MAX_DETECTIONS) {
             this._checkIfModuleIsNeeded();
         }
@@ -297,7 +297,6 @@ const FixedVhPolyfill = {
         window.addEventListener('scroll', handlers.scroll);
         window.addEventListener('touchstart', handlers.touchStart);
         window.addEventListener('touchend', handlers.touchEnd);
-        window.addEventListener('touchmove', handlers.touchMove);
         window.addEventListener('resize', handlers.resize);
         window.addEventListener('orientationchange', handlers.orientation);
     },
@@ -353,7 +352,6 @@ const FixedVhPolyfill = {
         window.removeEventListener('scroll', handlers.scroll);
         window.removeEventListener('touchstart', handlers.touchStart);
         window.removeEventListener('touchend', handlers.touchEnd);
-        window.removeEventListener('touchmove', handlers.touchMove);
         window.removeEventListener('resize', handlers.resize);
         window.removeEventListener('orientationchange', handlers.orientation);
         document.documentElement.style.setProperty(this.state.lvhPropertyName, `1lvh`);
@@ -370,9 +368,12 @@ const FixedVhPolyfill = {
             clearTimeout(this.state.touchTimeout);
         if (this.state.touchScrollTimeout)
             clearTimeout(this.state.touchScrollTimeout);
+        if (this.state.resizeTimeout)
+            clearTimeout(this.state.resizeTimeout);
         if (this.state.rAf)
             cancelAnimationFrame(this.state.rAf);
         this.state.rAf = null;
+        this.state.resizeTimeout = undefined;
         this.state.scrollTimeout = undefined;
         this.state.touchTimeout = undefined;
         this.state.touchScrollTimeout = undefined;
@@ -380,8 +381,8 @@ const FixedVhPolyfill = {
     createDebugContainer() {
         const containerHTML = `
 		    <div id="log-container">
-				<h4 style="margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">Log</h4>
-				<div id="status" style="display: flex; flex-direction: column; font-size: 0.6rem; margin-top: 0.5rem; gap: 0.2rem;">
+				<h4 style="margin-top:1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">State</h4>
+				<div id="status" style="display: flex; flex-direction: column; font-size: 0.6rem; margin-top: 0.5rem; gap: 0.2rem; background: rgba(255, 255, 255, 0.25); padding: 0.5rem; border-radius: 5px;">
 					<span>isModuleNeeded: ${this.state.isModuleNeeded}</span>
 					<span>isDetectionComplete: ${this.state.isDetectionComplete}</span>
 					<span>isTouching: ${this.state.isTouching}</span>
@@ -390,6 +391,7 @@ const FixedVhPolyfill = {
 					<span>lvh: ${this.state.lvh}</span>
 					<span>svh: ${this.state.svh}</span>
 				</div>
+				<h4 style="margin-top:1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">Log</h4>
 				<ul id="log-list" style="flex-grow: 1; overflow-y: auto; padding-right: 0.5rem; display:flex; flex-direction:column;"></ul>
 				<button id="local-storage-clear-btn"">Clear localStorage</button>
 				<button id="close-log-btn">Close</button>
@@ -398,7 +400,7 @@ const FixedVhPolyfill = {
 			
 			<style>
 				#log-container {
-					position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 50%; height: calc(50 * var(--svh, 1vh)); overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all;
+					position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 50%; height: calc(75 * var(--svh, 1vh)); overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all; display :flex; flex-direction: column
 					button { background: #555; color: white; cursor: pointer;   font-size: 0.5rem; }
 					button#close-log-btn { position:absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.5rem; border: none; border-radius: 5px; background: #555; color: white; cursor: pointer;}
 					button#open-log-btn { background: transparent; display:none; position:absolute; top:0; left:0; width:100%; height:100%; align-items: center; justify-content: center;}
@@ -472,10 +474,7 @@ const FixedVhPolyfill = {
                     log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
                     log(` svhMeasurements: [${this.state.svhMeasurements}]`);
                 }
-                if (prop === 'isModuleNeeded') {
-                    log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
-                }
-                // @ts-ignore
+                log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
                 target[prop] = value;
                 updateStatus();
                 return true;

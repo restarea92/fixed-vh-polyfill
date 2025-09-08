@@ -5,7 +5,6 @@ export interface Handlers {
     touchEnd: () => void;
     resize: () => void;
     orientation: () => void;
-    touchMove: () => void;
 }
 /**
  * Interface for FixedVhPolyfill state and core functionality.
@@ -18,6 +17,7 @@ export interface FixedVhPolyfillState {
     scrollTimeout?: number;
     touchTimeout?: number;
     touchScrollTimeout?: number;
+    resizeTimeout?: number;
     rAf: number | null;
     isTouchScrolling?: boolean;
     isScrolling?: boolean;
