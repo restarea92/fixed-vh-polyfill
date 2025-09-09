@@ -10,8 +10,10 @@ export interface Handlers {
  * Interface for FixedVhPolyfill state and core functionality.
  */
 export interface FixedVhPolyfillState {
+    fvh: number;
     lvh: number;
     svh: number;
+    fvhPropertyName: string;
     lvhPropertyName: string;
     svhPropertyName: string;
     scrollTimeout?: number;
@@ -36,6 +38,7 @@ export interface FixedVhPolyfillInstance {
     initEventListener: () => void;
     setCustomProperties: (property: string, name: string) => void;
     init: (options?: {
+        fvhPropertyName?: string;
         lvhPropertyName?: string;
         svhPropertyName?: string;
         debugMode?: boolean;

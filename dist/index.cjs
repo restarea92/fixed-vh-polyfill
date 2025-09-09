@@ -121,8 +121,10 @@ const handlers = {
  * and manages scroll-related state for better mobile experience
  */
 const state = {
+    fvh: 0,
     lvh: 0,
     svh: 0,
+    fvhPropertyName: '--fvh',
     lvhPropertyName: '--lvh',
     svhPropertyName: '--svh',
     rAf: null,
@@ -184,6 +186,7 @@ const FixedVhPolyfill = {
      * @returns void
      */
     updateViewportHeight(force = false) {
+        const newFvh = toPx('1vh');
         const newLvh = toPx('1lvh');
         const newSvh = toPx('1svh');
         const setVar = (property, value) => {
@@ -192,10 +195,13 @@ const FixedVhPolyfill = {
                 this.state.lvh = value;
             if (property === this.state.svhPropertyName)
                 this.state.svh = value;
+            if (property === this.state.fvhPropertyName)
+                this.state.fvh = value;
         };
         if (force) {
             setVar(this.state.lvhPropertyName, newLvh);
             setVar(this.state.svhPropertyName, newSvh);
+            setVar(this.state.fvhPropertyName, newFvh);
             return;
         }
         // This is the core logic to prevent layout jank on mobile browsers.
@@ -309,7 +315,7 @@ const FixedVhPolyfill = {
      * @returns void
      */
     setCustomProperties(property, name) {
-        const allowedProperty = ['lvh', 'svh'];
+        const allowedProperty = ['fvh', 'lvh', 'svh'];
         if (!allowedProperty.includes(property))
             return;
         if (!name.startsWith('-')) {
@@ -317,10 +323,21 @@ const FixedVhPolyfill = {
         }
         else {
             if (!/^--[a-zA-Z0-9][a-zA-Z0-9_-]*$/.test(name)) {
-                name = property === 'lvh' ? '--lvh' : '--svh';
+                if (property === 'fvh') {
+                    name = '--fvh';
+                }
+                else if (property === 'lvh') {
+                    name = '--lvh';
+                }
+                else {
+                    name = '--svh';
+                }
             }
         }
-        if (property === 'lvh') {
+        if (property === 'fvh') {
+            this.state.fvhPropertyName = name;
+        }
+        else if (property === 'lvh') {
             this.state.lvhPropertyName = name;
         }
         else if (property === 'svh') {
@@ -330,11 +347,14 @@ const FixedVhPolyfill = {
     /**
      * Initializes stableScroll and sets up event listeners.
      * @param options - Configuration options
+     * @param options.debugMode - Whether to enable debug mode (default: false)
+     * @param options.fvhPropertyName - Custom CSS property name for fixed viewport height
      * @param options.lvhPropertyName - Custom CSS property name for large viewport height
      * @param options.svhPropertyName - Custom CSS property name for small viewport height
      * @returns void
      */
     init(options = {}) {
+        this.setCustomProperties('fvh', options.fvhPropertyName || this.state.fvhPropertyName);
         this.setCustomProperties('lvh', options.lvhPropertyName || this.state.lvhPropertyName);
         this.setCustomProperties('svh', options.svhPropertyName || this.state.svhPropertyName);
         this.initEventListener();
@@ -390,6 +410,7 @@ const FixedVhPolyfill = {
 					<span>isTouching: ${this.state.isTouching}</span>
 					<span>isTouchScrolling: ${this.state.isTouchScrolling}</span>
 					<span>isScrolling: ${this.state.isScrolling}</span>
+					<span>fvh: ${this.state.fvh}</span>
 					<span>lvh: ${this.state.lvh}</span>
 					<span>svh: ${this.state.svh}</span>
 				</div>
@@ -462,6 +483,7 @@ const FixedVhPolyfill = {
 					<span>isTouching: ${this.state.isTouching}</span>
 					<span>isTouchScrolling: ${this.state.isTouchScrolling}</span>
 					<span>isScrolling: ${this.state.isScrolling}</span>
+					<span>fvh: ${this.state.fvh}</span>
 					<span>lvh: ${this.state.lvh}</span>
 					<span>svh: ${this.state.svh}</span>
 				`;

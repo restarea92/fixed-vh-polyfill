@@ -17,9 +17,3 @@ export declare const createVirtualElement: () => HTMLElement;
  * const px = toPx('1lvh', 'computed', true);
  */
 export declare const toPx: (cssValue: string, method?: "computed" | "offsetHeight", isInt?: boolean) => number;
-/**
- * Detects if the device is iOS.
- * @returns {boolean} True if iOS, false otherwise
- * @remarks Uses user agent sniffing.
- */
-export declare const isIOS: () => boolean;
