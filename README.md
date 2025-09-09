@@ -6,25 +6,43 @@
 
 </div>
 
-<p align="center">
+<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.75rem; width:75%; margin:0 auto;">
   <a href="https://www.npmjs.com/package/fixed-vh-polyfill">
-    <img src="https://img.shields.io/npm/v/fixed-vh-polyfill.svg?style=for-the-badge" alt="NPM Version">
+    <img src="https://img.shields.io/npm/v/fixed-vh-polyfill?style=for-the-badge&logo=npm&color=CB3837&logoColor=f6f9ff&labelColor=424656" alt="NPM Version">
+  </a>
+  <a href="https://github.com/restarea92/fixed-vh-polyfill/pulse">
+    <img src="https://img.shields.io/github/last-commit/restarea92/fixed-vh-polyfill?style=for-the-badge&logo=github&color=71facb&logoColor=f6f9ff&labelColor=424656">
   </a>
   <a href="https://github.com/restarea92/fixed-vh-polyfill/actions/workflows/deploy-demo.yml">
-    <img src="https://img.shields.io/github/actions/workflow/status/restarea92/fixed-vh-polyfill/deploy-demo.yml?branch=main&style=for-the-badge" alt="Build Status">
+    <img src="https://img.shields.io/github/actions/workflow/status/restarea92/fixed-vh-polyfill/deploy-demo.yml?branch=main&style=for-the-badge&label=build&logo=github&color=c6dbff&logoColor=f6f9ff&labelColor=424656" alt="Build Status">
   </a>
-  <a href="https://opensource.org/licenses/MIT">
-    <img src="https://img.shields.io/npm/l/fixed-vh-polyfill?style=for-the-badge" alt="License">
+  <a href="https://github.com/restarea92/fixed-vh-polyfill/releases/latest">
+    <img src="https://img.shields.io/github/v/release/restarea92/fixed-vh-polyfill?style=for-the-badge&logo=gitbook&color=c6dbff&logoColor=f6f9ff&labelColor=424656">
   </a>
-</p>
-
-<p align="center">
+</div>
+<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.75rem; width:75%; margin:0 auto; margin-top:2rem;">
   <a href="https://restarea92.github.io/fixed-vh-polyfill/">
-    <img src="https://img.shields.io/badge/Live_Demo-Click_Here-2ea44f?style=for-the-badge" alt="Live Demo">
+    <img src="https://img.shields.io/badge/Live_Demo-Click_Here-c6dbff?style=for-the-badge&logo=refinedgithub&logoColor=f6f9ff&labelColor=424656" alt="Live Demo">
   </a>
-</p>
+</div>
+<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.75rem; width:75%; margin:0 auto; margin-top:2rem;">  
+<a href="https://opensource.org/licenses/MIT">
+    <img src="https://img.shields.io/badge/license-MIT-50aaff?style=for-the-badge&logo=open-source-initiative&logoColor=f6f9ff&labelColor=424656" alt="License: MIT">
+  </a>
+</div>
 
+<br>
 Some iOS in-app browsers or non-Safari browsers may incorrectly interpret viewport units, causing layout jitter during scroll. This module provides stable viewport height units (like `--fvh`, `--lvh`, or `--svh`) via CSS Custom Properties to ensure consistent sizing for web apps affected by these quirks. It intelligently detects if it's needed and deactivates itself on modern browsers to save resources.
+
+---
+
+## 🪲 The Problems
+
+- Some browsers have a dynamically changing viewport height due to UI elements like the address bar or on-screen keyboard. To address this, new units like `svh` and `lvh` were introduced.
+- However, even in browsers that support `svh` and `lvh`, these units are sometimes interpreted dynamically (like `dvh`), not as fixed values.
+- As a result, when UI elements (such as the address bar or bottom navigation) appear or disappear, the actual viewport height changes, and any element sized with viewport units (`vh`, `svh`, `lvh`) will also change height.
+- **The main issue**: if this resize is triggered by a scroll event, elements above the scroll position (even those using `lvh` or `svh`) will change height, causing the total document height to shift. This can break scroll position and lead to unexpected behavior.
+- This problem still affects many browsers, especially on iOS (e.g., Firefox for iOS, Arc for iOS, various in-app browsers, etc.).
 
 ---
 
@@ -46,7 +64,7 @@ npm install fixed-vh-polyfill
 ```
 
 
-### 2. Initialization
+### 2. Usage
 
 Since this polyfill interacts with the DOM, it's important to initialize it **after** the DOM is fully loaded. Wrap the `init()` call inside a `DOMContentLoaded` event listener.
 
@@ -57,6 +75,18 @@ import { FixedVhPolyfill } from 'fixed-vh-polyfill';
 document.addEventListener('DOMContentLoaded', () => {
   FixedVhPolyfill.init();
 });
+```
+
+or via CDN:
+
+```html
+<script type="module">
+    import { FixedVhPolyfill } from 'https://cdn.jsdelivr.net/npm/fixed-vh-polyfill/+esm';
+    
+    document.addEventListener('DOMContentLoaded', () => {
+        FixedVhPolyfill.init();
+    });
+</script>
 ```
 
 **CJS (Node.js):**
@@ -114,17 +144,51 @@ Once initialized, use the configured CSS custom properties in your CSS. The valu
 
 The `1vh`, `1lvh`, or `1svh` fallback ensures your layout remains sensible if the polyfill hasn't loaded or is disabled.
 
+The available CSS custom properties depend on your browser's viewport unit support:
+- `--fvh`: Available in all browsers that support `vh` units
+- `--lvh`, `--svh`: Available in browsers that support `lvh`/`svh` units (modern browsers)
+
 ```css
-.fullscreen-element {
-  /* Use --fvh for a stable viewport height that doesn't change on scroll */
-  height: calc(var(--fvh, 1vh) * 100);
+.fullscreen {
+ /* fvh: Initial viewport height when page first loads
+    - If page loads with address bar visible: similar to svh value
+    - If page loads with address bar hidden: similar to lvh value
+    - Provides consistent height regardless of subsequent UI changes */
+ height: calc(100 * var(--fvh, 1vh));
 }
 
-.another-element {
-  /* Or use your custom variable name if you set one */
-  height: calc(var(--my-stable-svh, 1svh) * 50);
+.fullscreen.large {
+ /* lvh: Fixed large viewport height (browser UI hidden)
+    - Use when you want content to utilize full available space
+    - Best for immersive experiences, fullscreen modals */
+ height: calc(var(--lvh, 1lvh) * 100);
+}
+
+.fullscreen.small {
+ /* svh: Fixed small viewport height (browser UI visible)
+    - Use when content must always be fully visible
+    - Best for critical UI, forms, navigation */
+ height: calc(var(--svh, 1svh) * 100);
+}
+
+/* Progressive enhancement fallback strategy:
+    1. Old browsers: 100vh (basic viewport height)
+    2. Modern browsers supporting lvh/svh: 100lvh (native large viewport)
+    3. All browsers: var(--lvh) (polyfilled stable version)
+    Use this pattern for maximum browser compatibility */
+.fullscreen.fallback {
+    height: 100vh;                        /* fallback for very old browsers */
+    height: 100lvh;                       /* native lvh for modern browsers */
+    height: calc(100 * var(--lvh, 1lvh)); /* polyfilled stable version */
 }
 ```
+### When to use each unit:
+
+- **`--fvh`**: General purpose stable viewport height, good for most use cases
+- **`--lvh`** (Large Viewport Height): Use when you want content to fit the **full available space** when browser UI is hidden (typically after scrolling down)
+- **`--svh`** (Small Viewport Height): Use when you want content to **always be visible** even when browser UI is shown (initial page load, scrolling up)
+
+
 
 ## 🐞 Debug Mode
 
