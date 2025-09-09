@@ -17,35 +17,52 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "rollup -c",
-    "test": "echo \"No tests yet\"",
+    "build": "npm run clean && rollup -c",
+    "build:watch": "rollup -c --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run typecheck",
     "prepublishOnly": "npm run build"
   },
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "git+https://github.com/restarea92/fixed-vh-polyfill.git"
+  },
+  "homepage": "https://github.com/restarea92/fixed-vh-polyfill#readme",
+  "bugs": {
+    "url": "https://github.com/restarea92/fixed-vh-polyfill/issues"
   },
   "keywords": [
     "viewport",
     "vh",
-    "ios",
-    "typescript",
-    "scroll",
     "lvh",
     "svh",
     "dvh",
+    "ios",
+    "safari",
+    "mobile",
+    "scroll",
+    "jitter",
+    "flicker",
+    "layout shift",
     "in-app browser",
-    "ios in-app browser"
+    "polyfill",
+    "typescript"
   ],
   "author": "Yohan Byun <restarea@me.com>",
   "license": "MIT",
   "type": "module",
+  "sideEffects": false,
   "devDependencies": {
-    "typescript": "^5.9.2",
-    "vite": "^7.1.4",
-    "rollup": "^4.0.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-commonjs": "^25.0.7",
-    "rollup-plugin-typescript2": "^0.34.1"
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "rimraf": "^5.0.10",
+    "rollup": "^4.0.0",
+    "rollup-plugin-typescript2": "^0.34.1",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.4"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }
