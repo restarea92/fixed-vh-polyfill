@@ -1,13 +1,16 @@
 // utils.ts
 // Utility functions for stableScroll
 
-// Cached virtual element to avoid multiple creations
+/**
+ * Caches the virtual element instance to prevent redundant DOM creation and ensure reuse.
+ * This improves performance by maintaining a single element throughout the lifecycle.
+ */
 let cachedVirtualElement: HTMLElement | null = null;
 
 /**
- * Creates a virtual element for viewport calculations.
- * @returns {HTMLElement} The created virtual element
- * @remarks Only one element is created and reused.
+ * Creates and caches a virtual element for viewport calculations.
+ * Ensures a single DOM element is reused to optimize performance.
+ * @returns {HTMLElement} The cached or newly created virtual element.
  * @example
  * const element = createVirtualElement();
  */	
@@ -27,12 +30,12 @@ const createVirtualElement = (): HTMLElement => {
 };
 
 /**
- * Converts a CSS unit to px (integer).
- * @param {string} cssValue CSS value to convert (e.g., '1lvh', '1svh')
- * @param {'computed' | 'offsetHeight'} method Method to use for conversion ('computed' uses getComputedStyle, 'offsetHeight' uses offsetHeight) default is 'computed'
- * @param {boolean} isInt Return type ('float' for decimal, 'int' for integer) default is false
- * @returns {number} px value
- * @remarks Automatically creates/reuses the virtual element.
+ * Converts a CSS length value to pixels.
+ * @param {string} cssValue - The CSS value to convert (e.g., '1lvh', '1svh').
+ * @param {'computed' | 'offsetHeight'} [method='computed'] - Conversion method: 'computed' uses getComputedStyle, 'offsetHeight' uses offsetHeight.
+ * @param {boolean} [isInt=false] - If true, returns a value rounded to the nearest tenth.
+ * @returns {number} The pixel value.
+ * @remarks Automatically creates and reuses a virtual element for measurement.
  * @example
  * const px = toPx('1lvh', 'computed', true);
  */
