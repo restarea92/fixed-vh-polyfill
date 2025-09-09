@@ -55,5 +55,6 @@ export interface FixedVhPolyfillInstance {
     _checkIfModuleIsNeeded: (force?: boolean) => void;
     _measureAndCheck: () => void;
     createDebugContainer: () => void;
+    log: (...args: any[]) => void;
     debug: () => void;
 }
