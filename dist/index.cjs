@@ -226,7 +226,6 @@ const FixedVhPolyfill = {
             setVar(this.state.lvhPropertyName, newLvh);
             setVar(this.state.svhPropertyName, newSvh);
             setVar(this.state.fvhPropertyName, newFvh);
-            this.log('Forced update:', { newFvh, newLvh, newSvh });
             return;
         }
         // This is the core logic to prevent layout jank on mobile browsers.
@@ -441,20 +440,21 @@ const FixedVhPolyfill = {
 				<ul id="log-list" style="flex-grow: 1; overflow-y: auto; padding-right: 0.5rem; display:flex; flex-direction:column;"></ul>
 				<button id="local-storage-clear-btn"">Clear localStorage</button>
 				<button id="close-log-btn">Close</button>
-				<button id="open-log-btn">Log</button>
+				<button id="open-log-btn">Debug Log</button>
 			</div>
 			
 			<style>
 				#log-container {
-					position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 50%; height: calc(75 * var(--svh, 1vh)); overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all; display :flex; flex-direction: column
-					button { background: #555; color: white; cursor: pointer;   font-size: 0.5rem; }
+					position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 50%; height: calc(75 * var(--svh, 1vh)); overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all; display :flex; flex-direction: column;
+					button { background: #555; color: white; cursor: pointer;  font-size: 0.5rem; }
 					button#close-log-btn { position:absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.5rem; border: none; border-radius: 5px; background: #555; color: white; cursor: pointer;}
 					button#open-log-btn { background: transparent; display:none; position:absolute; top:0; left:0; width:100%; height:100%; align-items: center; justify-content: center;}
 					button#local-storage-clear-btn { padding: 0.25rem 0.5rem;border: none; border-radius: 5px; }
 					&.hide {
-					 width: 2rem; height: 2rem; padding: 0; border-radius: 50%;
-					 > * { opacity: 0; padding: 0; margin: 0; height: 0; overflow: hidden; }
-					 > button#open-log-btn { display: flex; opacity: 1;  position: absolute; top: 0; right: 0; width: 100%; height: 100%; border-radius: 50%; }
+					 overflow-y: hidden;
+					 width: 20ch; height: 2rem; padding: 0; border-radius: 0.5rem;
+					 > * { opacity: 0; padding: 0; margin: 0; height: 0; width:0; overflow: hidden; overflow-y: hidden; }
+					 > button#open-log-btn { display: flex; opacity: 1;  position: absolute; top: 0; right: 0; width: 100%; height: 100%; border-radius: 50%; word-break: keep-all; }
 					}
 				}
 			</style>
@@ -521,7 +521,6 @@ const FixedVhPolyfill = {
                     this.log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
                     this.log(` svhMeasurements: [${this.state.svhMeasurements}]`);
                 }
-                this.log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
                 target[prop] = value;
                 updateStatus();
                 return true;
