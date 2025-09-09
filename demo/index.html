@@ -56,7 +56,7 @@
         section {
             width: fit-content;
             display: flex;
-            gap: 0.5rem;
+            gap: 1rem;
             margin-top: 2rem;
             padding: 0 1rem;
         }
@@ -71,14 +71,11 @@
                 border-radius: 1rem;
                 width: 100%;
                 height: var(--box-height);
-                background-color: rgba(255, 255, 255, 0.5);
+                background-color: rgba(255, 255, 255, 0.75);
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 1.5rem;
-                &::after {
-                    content: "100lvh";
-                }
             }
         }
         .container {
@@ -143,11 +140,72 @@
             }
         }
 
-        .true span {
-            color: green;
-            font-weight: bold;
+        .toggle-box {
+            margin-top: 0.5rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
         }
-        
+
+        .toggle-box > span {
+
+        }
+
+        .toggle-box input[type="checkbox"] {
+            position: relative;
+            appearance: none;
+            width: fit-content;
+            min-width: 3rem;
+            height: 1.25rem;
+            background: #ccc;
+            border-radius: 50px;
+            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: 0.2s quadratic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toggle-box input:checked[type="checkbox"] {
+            background: #7da6ff;
+        }
+
+        .toggle-box input[type="checkbox"]::after {
+            position: absolute;
+            content: "";
+            width: 1.5rem;
+            height: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 0;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+            transition: 0.3s;
+        }
+
+        .toggle-box input:checked[type="checkbox"]::after {
+            left: calc(100% - 1.5rem);
+        }
+
+        body.polyfill-off {
+            --fvh: 1dvh;
+            --lvh: 1lvh;
+            --svh: 1svh;
+            #log-container {
+                display: none !important;
+            }
+        }
+        button {
+            background: none;
+            border: none;
+            padding: 0;
+            margin: 0;
+            box-shadow: none;
+            outline: none;
+            font: inherit;
+            color: inherit;
+            cursor: pointer;
+        }
     </style>
 
     <div style="padding: 1rem; margin:1rem auto 0; background: rgba(255,255,255,0.9); border-radius: 10px; width: calc(100% - 2rem);">
@@ -159,25 +217,31 @@
         <p>Specifically, svh values cannot be parsed at load time and are accurately calculated only when the first touch scroll begins.</p>
         
         <h3>Test Method</h3>
-        <p><strong>Left two boxes</strong>: Use browser default 100lvh and 100svh values. In problematic iOS browsers, they behave like dvh with variable heights.</p>
-        <p><strong>Right two boxes</strong>: Use CSS variables --lvh and --svh for height settings. The module is applied to maintain stable scroll positions.</p>
+        <p><strong>Left boxes</strong>: Use browser default 100lvh and 100svh values. In problematic iOS browsers, they behave like dvh with variable heights.</p>
+        <p><strong>Right boxes</strong>: Use CSS variables --fvh, --lvh and --svh for height settings. The module is applied to maintain stable scroll positions.</p>
         
         <h3>Notes</h3>
         <p>Screen flickering in some browsers appears to be a rendering (painting) issue rather than actual scroll position changes.</p>
         <p>Currently distinguishes between touch and mouse scrolling by inference, which may not be perfect. Non-touch scrolling assumes viewport size doesn't change.</p>
+        
+        <h3>Compare: With vs Without Polyfill.</h3>
+        <div class="toggle-box">
+            <input type="checkbox" id="debug-toggle" checked>
+            <span>Module On</span>
+        </div>
     </div>
         
     <section id="test-section">
         <div class="container before">
             <div class="item lvh" style="height: 100lvh;">
                 <div>
-                    <span class="item-info">CSS Height: 100lvh</span>
+                    <span class="item-info">CSS Height: 100lvh (Browser default)</span>
                     <span class="item-height"></span>
                 </div>
             </div>
             <div class="item svh" style="height: 100svh;">
                 <div>
-                    <span class="item-info">CSS Height: 100svh</span>
+                    <span class="item-info">CSS Height: 100svh (Browser default)</span>
                     <span class="item-height"></span>
                 </div>
             </div>
@@ -204,14 +268,56 @@
         </div>
     </section>
     <section class="active">
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
-        <div class="item"></div>
+        <div class="item"><span>Card 1</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 2</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 3</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 4</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 5</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 6</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 7</span><span class="display-height"></span></div>
+        <div class="item"><span>Card 8</span><span class="display-height"></span></div>
     </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toggle = document.getElementById('debug-toggle');
+            const label = toggle.nextElementSibling;
+            toggle.addEventListener('change', (e) => {
+                if (toggle.checked) {
+                    label.textContent = 'Module On';
+                    document.body.classList.add('polyfill-on');
+                    document.body.classList.remove('polyfill-off');
+                } else {
+                    label.textContent = 'Module Off';
+                    document.body.classList.add('polyfill-off');
+                    document.body.classList.remove('polyfill-on');
+                }
+            });
+
+            const activeItems = document.querySelectorAll('section.active .item');
+            let rafId = null;
+            let pendingEntries = [];
+            const activeItemObserver = new ResizeObserver((entries) => {
+                pendingEntries.push(...entries);
+                if (rafId) return;
+                rafId = requestAnimationFrame(() => {
+                    const seen = new Set();
+                    pendingEntries.forEach(entry => {
+                        const item = entry.target;
+                        if (seen.has(item)) return;
+                        seen.add(item);
+                        const displayHeight = item.querySelector('.display-height');
+                        if (displayHeight) {
+                            displayHeight.textContent = ` - Height: ${item.offsetHeight}px`;
+                        }
+                    });
+                    pendingEntries = [];
+                    rafId = null;
+                });
+            });
+            activeItems.forEach(item => {
+                activeItemObserver.observe(item);
+            });
+        });
+    </script>
 </body>
 </html>
