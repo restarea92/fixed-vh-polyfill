@@ -184,7 +184,6 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 			setVar(this.state.lvhPropertyName, newLvh);
 			setVar(this.state.svhPropertyName, newSvh);
 			setVar(this.state.fvhPropertyName, newFvh);
-			this.log('Forced update:', { newFvh, newLvh, newSvh });
 			return;
 		}
 		// This is the core logic to prevent layout jank on mobile browsers.
@@ -484,7 +483,6 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 					this.log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
 					this.log(` svhMeasurements: [${this.state.svhMeasurements}]`);
 				}
-				this.log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
 				(target as any)[prop] = value;
 				updateStatus();
 				return true;
