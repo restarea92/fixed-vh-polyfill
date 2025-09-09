@@ -3,10 +3,11 @@
 # 📱 Fixed VH Polyfill
 
 **A lightweight JavaScript utility to stabilize viewport height units (vh, svh, lvh) on iOS and prevent scroll jitter. Some iOS in-app browsers or non-Safari browsers may incorrectly interpret these units, causing layout issues. This module ensures consistent viewport sizing for mobile web apps affected by these quirks. (TypeScript)**
-
 </div>
 
-<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.75rem; width:75%; margin:0 auto;">
+<br>
+
+<div align="center">
   <a href="https://www.npmjs.com/package/fixed-vh-polyfill">
     <img src="https://img.shields.io/npm/v/fixed-vh-polyfill?style=for-the-badge&logo=npm&color=CB3837&logoColor=f6f9ff&labelColor=424656" alt="NPM Version">
   </a>
@@ -20,12 +21,14 @@
     <img src="https://img.shields.io/github/v/release/restarea92/fixed-vh-polyfill?style=for-the-badge&logo=gitbook&color=c6dbff&logoColor=f6f9ff&labelColor=424656">
   </a>
 </div>
-<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.75rem; width:75%; margin:0 auto; margin-top:2rem;">
+<br>
+<div align="center">
   <a href="https://restarea92.github.io/fixed-vh-polyfill/">
     <img src="https://img.shields.io/badge/Live_Demo-Click_Here-c6dbff?style=for-the-badge&logo=refinedgithub&logoColor=f6f9ff&labelColor=424656" alt="Live Demo">
   </a>
 </div>
-<div style="display:flex; flex-wrap:wrap; justify-content:center; gap:0.75rem; width:75%; margin:0 auto; margin-top:2rem;">  
+<br>
+<div align="center">
 <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-50aaff?style=for-the-badge&logo=open-source-initiative&logoColor=f6f9ff&labelColor=424656" alt="License: MIT">
   </a>
