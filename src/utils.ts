@@ -1,23 +1,29 @@
 // utils.ts
 // Utility functions for stableScroll
 
+
+// Cached virtual element to avoid multiple creations
+let cachedVirtualElement: HTMLElement | null = null;
+
 /**
  * Creates a virtual element for viewport calculations.
  * @returns {HTMLElement} The created virtual element
  * @remarks Only one element is created and reused.
  * @example
  * const element = createVirtualElement();
- */
+ */	
 export const createVirtualElement = (): HTMLElement => {
-	let virtualElement = document.querySelector('#stable-scroll-virtual-element') as HTMLElement | null;
-	if (!virtualElement) {
-		virtualElement = document.createElement('div');
-		virtualElement.id = 'stable-scroll-virtual-element';
-		virtualElement.style.cssText = `
-			position:absolute;top:0;left:0;width:0;height:0;pointer-events:none;content-visibility:hidden;
-		`;
-		document.body.appendChild(virtualElement);
+	if (cachedVirtualElement) {
+		return cachedVirtualElement;
 	}
+	
+	const virtualElement = document.createElement('div');
+	virtualElement.id = 'stable-scroll-virtual-element';
+	virtualElement.style.cssText = `
+		position:absolute;top:0;left:0;width:0;height:0;pointer-events:none;content-visibility:hidden;
+	`;
+	document.body.appendChild(virtualElement);
+	cachedVirtualElement = virtualElement;
 	return virtualElement;
 };
 
