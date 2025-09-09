@@ -2,6 +2,8 @@
 
 // utils.ts
 // Utility functions for stableScroll
+// Cached virtual element to avoid multiple creations
+let cachedVirtualElement = null;
 /**
  * Creates a virtual element for viewport calculations.
  * @returns {HTMLElement} The created virtual element
@@ -10,15 +12,16 @@
  * const element = createVirtualElement();
  */
 const createVirtualElement = () => {
-    let virtualElement = document.querySelector('#stable-scroll-virtual-element');
-    if (!virtualElement) {
-        virtualElement = document.createElement('div');
-        virtualElement.id = 'stable-scroll-virtual-element';
-        virtualElement.style.cssText = `
-			position:absolute;top:0;left:0;width:0;height:0;pointer-events:none;content-visibility:hidden;
-		`;
-        document.body.appendChild(virtualElement);
+    if (cachedVirtualElement) {
+        return cachedVirtualElement;
     }
+    const virtualElement = document.createElement('div');
+    virtualElement.id = 'stable-scroll-virtual-element';
+    virtualElement.style.cssText = `
+		position:absolute;top:0;left:0;width:0;height:0;pointer-events:none;content-visibility:hidden;
+	`;
+    document.body.appendChild(virtualElement);
+    cachedVirtualElement = virtualElement;
     return virtualElement;
 };
 /**
@@ -183,6 +186,10 @@ const FixedVhPolyfill = {
      * @returns void
      */
     refreshDimensions(force = false) {
+        if (state.rAf)
+            cancelAnimationFrame(state.rAf);
+        if (state.resizeTimeout)
+            clearTimeout(state.resizeTimeout);
         if (force) {
             if (!state.isDetectionComplete) {
                 state.detectionCount = 0;
@@ -193,10 +200,6 @@ const FixedVhPolyfill = {
             this.updateViewportHeight(true);
             return;
         }
-        if (state.rAf)
-            cancelAnimationFrame(state.rAf);
-        if (state.resizeTimeout)
-            clearTimeout(state.resizeTimeout);
         state.resizeTimeout = window.setTimeout(() => {
             this.updateViewportHeight(false);
         }, DEBOUNCE_MS.RESIZE);
@@ -223,6 +226,7 @@ const FixedVhPolyfill = {
             setVar(this.state.lvhPropertyName, newLvh);
             setVar(this.state.svhPropertyName, newSvh);
             setVar(this.state.fvhPropertyName, newFvh);
+            this.log('Forced update:', { newFvh, newLvh, newSvh });
             return;
         }
         // This is the core logic to prevent layout jank on mobile browsers.
@@ -239,10 +243,7 @@ const FixedVhPolyfill = {
                 setVar(this.state.svhPropertyName, newSvh);
             }
         }
-        else {
-            setVar(this.state.lvhPropertyName, newLvh);
-            setVar(this.state.svhPropertyName, newSvh);
-        }
+        // during a scroll/touch action or when forced, to maximize stability.
     },
     /**
      * Checks if the polyfill is needed by analyzing collected viewport height measurements.
@@ -485,17 +486,17 @@ const FixedVhPolyfill = {
             }
         });
     },
-    debug() {
-        this.createDebugContainer();
+    log(message) {
         const logList = document.getElementById('log-list');
         if (!logList)
             return;
-        const log = (message) => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${message}`;
-            logList.appendChild(listItem);
-            logList.scrollTop = logList.scrollHeight;
-        };
+        const listItem = document.createElement('li');
+        listItem.textContent = `${message}`;
+        logList.appendChild(listItem);
+        logList.scrollTop = logList.scrollHeight;
+    },
+    debug() {
+        this.createDebugContainer();
         const updateStatus = () => {
             const status = document.getElementById('status');
             if (status) {
@@ -516,11 +517,11 @@ const FixedVhPolyfill = {
         const stateProxy = new Proxy(this.state, {
             set: (target, prop, value) => {
                 if (prop === selectedProp) {
-                    log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
-                    log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
-                    log(` svhMeasurements: [${this.state.svhMeasurements}]`);
+                    this.log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
+                    this.log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
+                    this.log(` svhMeasurements: [${this.state.svhMeasurements}]`);
                 }
-                log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
+                this.log(` [${new Date().toLocaleTimeString()}] ${String(prop)} change: ${value}`);
                 target[prop] = value;
                 updateStatus();
                 return true;
@@ -528,10 +529,10 @@ const FixedVhPolyfill = {
         });
         this.state = stateProxy;
         window.addEventListener('load', () => {
-            log(` [${new Date().toLocaleTimeString()}] Debug mode initialized.`);
-            log(` needModule: ${this.state.isModuleNeeded}`);
-            log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
-            log(` svhMeasurements: [${this.state.svhMeasurements}]`);
+            this.log(` [${new Date().toLocaleTimeString()}] Debug mode initialized.`);
+            this.log(` needModule: ${this.state.isModuleNeeded}`);
+            this.log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
+            this.log(` svhMeasurements: [${this.state.svhMeasurements}]`);
         });
     }
 };

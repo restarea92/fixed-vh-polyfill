@@ -32,22 +32,24 @@ export interface FixedVhPolyfillState {
     svhMeasurements: number[];
     isModuleNeeded: boolean | null;
 }
+export interface FixedVhPolyfillOptions {
+    fvhPropertyName?: string;
+    lvhPropertyName?: string;
+    svhPropertyName?: string;
+    debugMode?: boolean;
+}
 export interface FixedVhPolyfillInstance {
     state: FixedVhPolyfillState;
     refreshDimensions: (force?: boolean) => void;
     updateViewportHeight: (force?: boolean) => void;
     initEventListener: () => void;
     setCustomProperties: (property: string, name: string) => void;
-    init: (options?: {
-        fvhPropertyName?: string;
-        lvhPropertyName?: string;
-        svhPropertyName?: string;
-        debugMode?: boolean;
-    }) => void;
+    init: (options?: FixedVhPolyfillOptions) => void;
     cleanup: () => void;
     clearTimeouts: () => void;
     _checkIfModuleIsNeeded: (force?: boolean) => void;
     _measureAndCheck: () => void;
     createDebugContainer: () => void;
+    log: (...args: any[]) => void;
     debug: () => void;
 }
