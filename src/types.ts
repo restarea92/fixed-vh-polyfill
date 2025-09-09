@@ -40,6 +40,13 @@ export interface FixedVhPolyfillState {
     isModuleNeeded: boolean | null;
 }
 
+export interface FixedVhPolyfillOptions {
+    fvhPropertyName?: string;
+    lvhPropertyName?: string;
+    svhPropertyName?: string;
+    debugMode?: boolean;
+}
+
 /*
  * Interface for FixedVhPolyfill instance methods and properties.
  */
@@ -49,7 +56,7 @@ export interface FixedVhPolyfillInstance {
     updateViewportHeight: (force?: boolean) => void;
     initEventListener: () => void;
     setCustomProperties: (property: string, name: string) => void;
-    init: (options?: {fvhPropertyName?: string; lvhPropertyName?: string; svhPropertyName?: string; debugMode?: boolean; }) => void;
+    init: (options?: FixedVhPolyfillOptions) => void;
     cleanup: () => void;
     clearTimeouts: () => void;
     _checkIfModuleIsNeeded: (force?: boolean) => void;

@@ -1,4 +1,4 @@
-import type { FixedVhPolyfillInstance, FixedVhPolyfillState, Handlers } from './types';
+import type { FixedVhPolyfillInstance, FixedVhPolyfillState, Handlers, FixedVhPolyfillOptions } from './types';
 import { toPx } from './utils';
 
 /**
@@ -333,7 +333,7 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 	 * @param options.svhPropertyName - Custom CSS property name for small viewport height
 	 * @returns void
 	 */
-	init(options = {}) {
+	init(options: FixedVhPolyfillOptions = {}) {
 		this.setCustomProperties('fvh', options.fvhPropertyName || this.state.fvhPropertyName);
 		this.setCustomProperties('lvh', options.lvhPropertyName || this.state.lvhPropertyName);
 		this.setCustomProperties('svh', options.svhPropertyName || this.state.svhPropertyName);

@@ -1,7 +1,6 @@
 // utils.ts
 // Utility functions for stableScroll
 
-
 // Cached virtual element to avoid multiple creations
 let cachedVirtualElement: HTMLElement | null = null;
 
