@@ -12,8 +12,11 @@ export interface Handlers {
  * Interface for FixedVhPolyfill state and core functionality.
  */
 export interface FixedVhPolyfillState {
+    fvh: number;
     lvh: number;
     svh: number;
+
+    fvhPropertyName: string;
     lvhPropertyName: string;
     svhPropertyName: string;
 
@@ -29,8 +32,10 @@ export interface FixedVhPolyfillState {
     virtualElement?: HTMLElement | null;
     isDetectionComplete: boolean;
     detectionCount: number;
+
     lvhMeasurements: number[];
     svhMeasurements: number[];
+    
     isModuleNeeded: boolean | null;
 }
 
@@ -43,7 +48,7 @@ export interface FixedVhPolyfillInstance {
     updateViewportHeight: (force?: boolean) => void;
     initEventListener: () => void;
     setCustomProperties: (property: string, name: string) => void;
-    init: (options?: { lvhPropertyName?: string; svhPropertyName?: string; debugMode?: boolean; }) => void;
+    init: (options?: {fvhPropertyName?: string; lvhPropertyName?: string; svhPropertyName?: string; debugMode?: boolean; }) => void;
     cleanup: () => void;
     clearTimeouts: () => void;
     _checkIfModuleIsNeeded: (force?: boolean) => void;

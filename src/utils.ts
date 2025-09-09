@@ -44,13 +44,3 @@ export const toPx = (cssValue: string, method: 'computed' | 'offsetHeight' = 'co
 		return virtualElement.offsetHeight;
 	}
 };
-
-/**
- * Detects if the device is iOS.
- * @returns {boolean} True if iOS, false otherwise
- * @remarks Uses user agent sniffing.
- */
-export const isIOS = (): boolean => {
-	return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-		(navigator.userAgent.includes('Macintosh') && 'ontouchend' in document);
-};
