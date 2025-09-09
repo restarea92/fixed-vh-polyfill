@@ -424,7 +424,7 @@ const FixedVhPolyfill = {
     },
     createDebugContainer() {
         const containerHTML = `
-		    <div id="log-container">
+		    <div id="log-container" class="hide">
 				<h4 style="margin-top:1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">State</h4>
 				<div id="status" style="display: flex; flex-direction: column; font-size: 0.6rem; margin-top: 0.5rem; gap: 0.2rem; background: rgba(255, 255, 255, 0.25); padding: 0.5rem; border-radius: 5px;">
 					<span>isModuleNeeded: ${this.state.isModuleNeeded}</span>

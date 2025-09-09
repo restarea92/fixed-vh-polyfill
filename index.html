@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stable Scroll VH Test</title>
+    <title>fixed-vh-polyfill Demo Page.</title>
     <script type="module">
         import { FixedVhPolyfill, state } from './dist/index.mjs';
 
@@ -19,197 +19,10 @@
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
 </head>
 <body>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        html {
-            width: 100%;
-            min-height: calc(300 * var(--lvh));
-            overflow-x: clip;
-            margin: 0;
-            font-size:16px;
-        }
-        body {
-            margin: 0;
-            overflow-x: clip;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            height: fit-content;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4) no-repeat;
-            font-family: "Pretendard", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
-        }
-        h3 {
-            margin-top: 2rem;
-        }
-        p {
-            margin-top: 0.5rem;
-            line-height: 1.25;
-        }
-        li {
-            list-style: none;
-            padding-left: 0.5rem;
-        }
-        section {
-            width: fit-content;
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding: 0 1rem;
-        }
-        section.active {
-            width: 100%;
-            padding: 1rem;
-            display: flex;
-            gap:1rem;
-            flex-direction: column;
-            .item {
-                --box-height: calc(var(--lvh) * 100);
-                border-radius: 1rem;
-                width: 100%;
-                height: var(--box-height);
-                background-color: rgba(255, 255, 255, 0.75);
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-            }
-        }
-        .container {
-            display: flex;
-            gap: 0.25rem;
-            margin-bottom: 1rem;
-            .item {
-                padding: 1rem;
-                display: flex;
-                align-items: flex-start;
-                border: 2px solid #000;
-                background: white;
-                position: relative;
-                line-height: 1;
-                font-size: 0.75rem;
-                display: flex;
-                width: fit-content;
-                height: fit-content;
-                &::before {
-                    margin-top: 0;
-                    font-size: 2rem;
-                    content: '⇧';
-                    position: absolute;
-                    top: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                }
-                &::after {
-                    margin-top: 0;
-                    font-size: 2rem;
-                    content: '⇩';
-                    position: absolute;
-                    bottom: 0;
-                    left: 50%;
-                    transform: translateX(-50%);
-                }
-                > div {
-                    font-style: italic;
-                    writing-mode: vertical-lr;
-                    width: fit-content;
-                    top: 100%;
-                    bottom: 1rem;
-                    left: 0;
-                    display: flex;
-                    align-items: center;
-                    gap:0.5rem;
-                    margin-top: 2rem;
-                    margin-bottom: 2rem;
-                    position: sticky;
-                    > span {
-                        white-space: nowrap;
-                        font-weight: bold;
-                        &.item-height {
-                            font-weight: bold;
-                            color:red;
-                            display: flex;
-                            gap:0.25rem;
-                            flex-direction: column;
-                        }
-                    }
-                }
-            }
-        }
-
-        .toggle-box {
-            margin-top: 0.5rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 1rem;
-            width: 100%;
-        }
-
-        .toggle-box > span {
-
-        }
-
-        .toggle-box input[type="checkbox"] {
-            position: relative;
-            appearance: none;
-            width: fit-content;
-            min-width: 3rem;
-            height: 1.25rem;
-            background: #ccc;
-            border-radius: 50px;
-            box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-            transition: 0.2s quadratic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .toggle-box input:checked[type="checkbox"] {
-            background: #7da6ff;
-        }
-
-        .toggle-box input[type="checkbox"]::after {
-            position: absolute;
-            content: "";
-            width: 1.5rem;
-            height: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            left: 0;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
-            transition: 0.3s;
-        }
-
-        .toggle-box input:checked[type="checkbox"]::after {
-            left: calc(100% - 1.5rem);
-        }
-
-        body.polyfill-off {
-            --fvh: 1dvh;
-            --lvh: 1lvh;
-            --svh: 1svh;
-            #log-container {
-                display: none !important;
-            }
-        }
-        button {
-            background: none;
-            border: none;
-            padding: 0;
-            margin: 0;
-            box-shadow: none;
-            outline: none;
-            font: inherit;
-            color: inherit;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
 
     <div style="padding: 1rem; margin:1rem auto 0; background: rgba(255,255,255,0.9); border-radius: 10px; width: calc(100% - 2rem);">
-        <h1>Stable Scroll VH Test</h1>
+        <h1>Stable Scroll Test with fixed-vh-polyfill</h1>
         <p>This page tests the stable operation of a module that fixes viewport height units (lvh, svh) in certain iOS in-app browsers, Firefox, and Arc Browser.</p>
         
         <h3>Problem</h3>
@@ -268,14 +81,38 @@
         </div>
     </section>
     <section class="active">
-        <div class="item"><span>Card 1</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 2</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 3</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 4</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 5</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 6</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 7</span><span class="display-height"></span></div>
-        <div class="item"><span>Card 8</span><span class="display-height"></span></div>
+        <div class="item" style="height: calc(200 * var(--lvh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/1493226/pexels-photo-1493226.jpeg?w=1920" alt=""></div>
+            <span>Card 1 - 200lvh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(100 * var(--fvh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/1906658/pexels-photo-1906658.jpeg?w=1920" alt=""></div>
+            <span>Card 2 - 100vh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(100 * var(--svh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/1337247/pexels-photo-1337247.jpeg?w=1920" alt=""></div>
+            <span>Card 3 - 100svh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(100 * var(--lvh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/1081685/pexels-photo-1081685.jpeg?w=1920" alt=""></div>
+            <span>Card 4 - 100lvh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(75 * var(--svh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/2047905/pexels-photo-2047905.jpeg?w=1920" alt=""></div>
+            <span>Card 5 - 75svh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(75 * var(--lvh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/7293759/pexels-photo-7293759.jpeg?w=1920" alt=""></div>
+            <span>Card 6 - 75lvh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(75 * var(--fvh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/485294/pexels-photo-485294.jpeg?w=1920" alt=""></div>
+            <span>Card 7 - 75vh</span><span class="display-height"></span>
+        </div>
+        <div class="item" style="height: calc(100 * var(--fvh));">
+            <div class="item-image"><img src="https://images.pexels.com/photos/8655362/pexels-photo-8655362.jpeg?w=1920" alt=""></div>
+            <span>Card 8 - 100vh</span><span class="display-height"></span>
+        </div>
     </section>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -307,7 +144,7 @@
                         seen.add(item);
                         const displayHeight = item.querySelector('.display-height');
                         if (displayHeight) {
-                            displayHeight.textContent = ` - Height: ${item.offsetHeight}px`;
+                            displayHeight.textContent = `Height: ${item.offsetHeight}px`;
                         }
                     });
                     pendingEntries = [];

@@ -1,0 +1,194 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+html {
+    width: 100%;
+    min-height: calc(300 * var(--lvh));
+    overflow-x: clip;
+    margin: 0;
+    font-size:16px;
+}
+body {
+    margin: 0;
+    overflow-x: clip;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    height: fit-content;
+    background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4) no-repeat;
+    font-family: "Pretendard", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
+}
+h3 {
+    margin-top: 2rem;
+}
+p {
+    margin-top: 0.5rem;
+    line-height: 1.25;
+}
+li {
+    list-style: none;
+    padding-left: 0.5rem;
+}
+section {
+    width: fit-content;
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+section.active {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    gap:1rem;
+    flex-direction: column;
+}
+section.active .item {
+    --box-height: calc(var(--lvh) * 100);
+    border-radius: 1rem;
+    width: 100%;
+    height: var(--box-height);
+    background-color: rgba(0, 0, 0, 0.5);
+    color:white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: 600;
+    position: relative;
+    overflow: hidden;
+}
+section.active .item-image {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+section.active .item-image img {
+    width: 120%;
+    height: 120%;
+    object-position: center;
+    object-fit: cover;
+}
+.container {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1rem;
+}
+.container .item {
+    padding: 1rem;
+    display: flex;
+    align-items: flex-start;
+    border: 2px solid #000;
+    background: white;
+    position: relative;
+    line-height: 1;
+    font-size: 0.75rem;
+    width: fit-content;
+    height: fit-content;
+}
+.container .item::before {
+    margin-top: 0;
+    font-size: 2rem;
+    content: '⇧';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.container .item::after {
+    margin-top: 0;
+    font-size: 2rem;
+    content: '⇩';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+}
+.container .item > div {
+    font-style: italic;
+    writing-mode: vertical-lr;
+    width: fit-content;
+    top: 100%;
+    bottom: 1rem;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap:0.5rem;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+    position: sticky;
+}
+.container .item > div > span {
+    white-space: nowrap;
+    font-weight: bold;
+}
+.container .item > div > span.item-height {
+    font-weight: bold;
+    color:red;
+    display: flex;
+    gap:0.25rem;
+    flex-direction: column;
+}
+.toggle-box {
+    margin-top: 0.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+.toggle-box input[type="checkbox"] {
+    position: relative;
+    appearance: none;
+    width: fit-content;
+    min-width: 3rem;
+    height: 1.25rem;
+    background: #ccc;
+    border-radius: 50px;
+    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    transition: 0.2s quadratic-bezier(0.4, 0, 0.2, 1);
+}
+.toggle-box input:checked[type="checkbox"] {
+    background: #7da6ff;
+}
+.toggle-box input[type="checkbox"]::after {
+    position: absolute;
+    content: "";
+    width: 1.5rem;
+    height: 1.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+}
+.toggle-box input:checked[type="checkbox"]::after {
+    left: calc(100% - 1.5rem);
+}
+body.polyfill-off {
+    --fvh: 1dvh;
+    --lvh: 1lvh;
+    --svh: 1svh;
+}
+body.polyfill-off #log-container {
+    display: none !important;
+}
+button {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+    outline: none;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
