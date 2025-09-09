@@ -11,7 +11,7 @@ let cachedVirtualElement: HTMLElement | null = null;
  * @example
  * const element = createVirtualElement();
  */	
-export const createVirtualElement = (): HTMLElement => {
+const createVirtualElement = (): HTMLElement => {
 	if (cachedVirtualElement) {
 		return cachedVirtualElement;
 	}
