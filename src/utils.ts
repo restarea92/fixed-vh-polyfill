@@ -52,3 +52,7 @@ export const toPx = (cssValue: string, method: 'computed' | 'offsetHeight' = 'co
 		return virtualElement.offsetHeight;
 	}
 };
+
+export const Utils = {
+    toPx,
+};
