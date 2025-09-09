@@ -13,6 +13,7 @@ export interface FixedVhPolyfillState {
     fvh: number;
     lvh: number;
     svh: number;
+    currentWidth: number;
     fvhPropertyName: string;
     lvhPropertyName: string;
     svhPropertyName: string;
