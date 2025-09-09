@@ -15,6 +15,7 @@ export interface FixedVhPolyfillState {
     fvh: number;
     lvh: number;
     svh: number;
+    currentWidth: number; // 현재 너비 상태 추가
 
     fvhPropertyName: string;
     lvhPropertyName: string;

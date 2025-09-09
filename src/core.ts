@@ -15,20 +15,26 @@ const DEBOUNCE_MS = {
 } as const;
 
 /**
- * Core logic for state management through raw event handlers.
- * The main purpose is to accurately infer an `isTouchScrolling` state, as browsers do not provide this natively.
- * It works by orchestrating `touch*` and `scroll` events, where higher-priority touch events
- * can cancel pending timeouts from scroll events. This "takeover" mechanism ensures the state is always
- * correctly reflecting the user's most recent action.
+ * Core logic for the polyfill, implemented through raw event handlers.
+ * The main strategy is to differentiate between "intentional" and "unintentional" resize events.
+ * - An intentional resize (e.g., device rotation, window resizing) is detected by a change in `window.innerWidth`.
+ *   This triggers a full recalculation of all viewport units.
+ * - An unintentional resize (e.g., browser UI appearing/disappearing during a scroll) is detected when a `resize`
+ *   event fires but `window.innerWidth` remains the same. This triggers only "safe" updates to `lvh` and `svh`
+ *   to prevent layout jank, while preserving the user's scroll state.
  */
 const handlers: Handlers = {
 	load: () => {
-		FixedVhPolyfill.refreshDimensions(true);
 		const state = FixedVhPolyfill.state;
+		state.currentWidth = window.innerWidth; // Save initial width
+		FixedVhPolyfill.refreshDimensions(true);
 		const currentLvh = toPx('1lvh');
 		const currentSvh = toPx('1svh');
+		const currentFvh = toPx('1vh');
 		state.lvhMeasurements.push(currentLvh);
 		state.svhMeasurements.push(currentSvh);
+		document.documentElement.style.setProperty(state.fvhPropertyName, `${currentFvh}px`);
+		state.fvh = currentFvh;
 	},
 	scroll: () => { 
 		const state = FixedVhPolyfill.state;
@@ -44,7 +50,7 @@ const handlers: Handlers = {
 			}, DEBOUNCE_MS.TOUCH_SCROLL_END);
 		}
 		state.scrollTimeout = window.setTimeout(() => {
-			FixedVhPolyfill._measureAndCheck();
+			FixedVhPolyfill._measureAndCheck(); 
 			state.isScrolling = false;
 		}, DEBOUNCE_MS.SCROLL_END);
 	},
@@ -64,10 +70,23 @@ const handlers: Handlers = {
 	},
 
 	resize: () => {
-		FixedVhPolyfill.refreshDimensions();
+		// Handles viewport resize events, distinguishing between intentional and unintentional resizes.
+		const state = FixedVhPolyfill.state;
+		const newWidth = window.innerWidth;
+		if (newWidth !== state.currentWidth) {
+			// If the width changes, treat it as an intentional resize (e.g., device rotation, window resize).
+			state.currentWidth = newWidth;
+			FixedVhPolyfill.refreshDimensions(true);
+		} else {
+			// If the width is the same, treat it as an unintentional resize (e.g., scroll-induced).
+			FixedVhPolyfill.refreshDimensions(false);
+		}
 	},
 
 	orientation: () => {
+		// Orientation change is always considered an intentional resize.
+		const state = FixedVhPolyfill.state;
+		state.currentWidth = window.innerWidth;
 		FixedVhPolyfill.refreshDimensions(true);
 	},
 };
@@ -80,6 +99,7 @@ export const state: FixedVhPolyfillState = {
 	fvh: 0,
 	lvh: 0,
 	svh: 0,
+	currentWidth: 0, // 너비 상태 추가
 	
 	fvhPropertyName: '--fvh',
 	lvhPropertyName: '--lvh',
@@ -331,15 +351,16 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 	 * @returns void
 	 */
 	cleanup() {
-		this.clearTimeouts();
 		window.removeEventListener('load', handlers.load);
 		window.removeEventListener('scroll', handlers.scroll);
 		window.removeEventListener('touchstart', handlers.touchStart);
 		window.removeEventListener('touchend', handlers.touchEnd);
 		window.removeEventListener('resize', handlers.resize);
 		window.removeEventListener('orientationchange', handlers.orientation);
+		this.clearTimeouts();
 		document.documentElement.style.setProperty(this.state.lvhPropertyName, `1lvh`);
 		document.documentElement.style.setProperty(this.state.svhPropertyName, `1svh`);
+		document.documentElement.style.setProperty(this.state.fvhPropertyName, `1vh`);
 	},
 
 	/**
@@ -456,7 +477,7 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		};
 
 		// proxy state
-		const selectedProp = 'detectionCount'; // 원하는 프로퍼티명으로 변경
+		const selectedProp = 'detectionCount';
 		const stateProxy = new Proxy(this.state, {
 			set: (target, prop, value) => {
 				if (prop === selectedProp) {
