@@ -37,6 +37,38 @@
 <br>
 Some iOS in-app browsers or non-Safari browsers may incorrectly interpret viewport units, causing layout jitter during scroll. This module provides stable viewport height units (like `--fvh`, `--lvh`, or `--svh`) via CSS Custom Properties to ensure consistent sizing for web apps affected by these quirks. It intelligently detects if it's needed and deactivates itself on modern browsers to save resources.
 
+
+---
+
+## ⚡ Quickstart
+
+Install:
+```bash
+npm install fixed-vh-polyfill
+```
+
+ESM (recommended):
+```javascript
+import { FixedVhPolyfill } from 'fixed-vh-polyfill';
+
+document.addEventListener('DOMContentLoaded', () => {
+  FixedVhPolyfill.init();
+});
+```
+
+CDN (module):
+```html
+<script type="module">
+  import { FixedVhPolyfill } from 'https://cdn.jsdelivr.net/npm/fixed-vh-polyfill/+esm';
+  document.addEventListener('DOMContentLoaded', () => FixedVhPolyfill.init());
+</script>
+```
+
+CommonJS:
+```javascript
+const { FixedVhPolyfill } = require('fixed-vh-polyfill');
+document.addEventListener('DOMContentLoaded', () => FixedVhPolyfill.init());
+```
 ---
 
 ## 🪲 The Problems
@@ -52,11 +84,15 @@ Some iOS in-app browsers or non-Safari browsers may incorrectly interpret viewpo
 ## ✨ Features
 
 -   **📏 Stable Viewport Units**: Provides CSS Custom Properties like `--fvh`, `--svh`, `--lvh` that aren't affected by browser UI changes.
--   **🤖 Automatic Deactivation**: Intelligently disables itself on desktop or modern mobile browsers where it's not needed.
+-   **🧠 Smart Detection**: Automatically detects if it's needed by measuring viewport unit behavior across multiple events
+-   **🤖 Self-Optimization**: If stable viewport units are detected, automatically cleans up and stops running to save resources
+-   **💾 Intelligent Caching**: Detection results are cached in localStorage to avoid repeated measurements on subsequent visits
+-   **⚡ Resource Efficient**: Only runs when actually needed, with minimal performance impact
 -   **🪶 Lightweight**: Tiny and has zero dependencies.
 -   **🧩 Easy Integration**: Simply import and initialize. It works automatically.
 -   **🎨 Customizable**: Allows setting custom CSS variable names to avoid conflicts.
 -   **🐞 Debug Mode**: Optional mode to monitor the polyfill's internal state.
+-   **🖥️ Overlay Debug UI**: Enable a visual overlay to inspect the polyfill's behavior in real-time.
 
 ## 🚀 Getting Started
 
@@ -111,6 +147,54 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 </script>
 ```
+
+**Usage with React:**
+
+```jsx
+import { useEffect } from "react";
+import { FixedVhPolyfill } from "fixed-vh-polyfill";
+
+function App() {
+  useEffect(() => {
+    FixedVhPolyfill.init();
+    // Optionally call cleanup on unmount in SPAs
+    return () => FixedVhPolyfill.cleanup();
+  }, []);
+
+  return (
+    <div className="fullscreen">
+      {/* ... */}
+    </div>
+  );
+}
+
+export default App;
+```
+
+**Usage with Vuejs**
+
+```jsx
+<script setup>
+import { onMounted, onBeforeUnmount } from "vue";
+import { FixedVhPolyfill } from "fixed-vh-polyfill";
+
+onMounted(() => {
+  FixedVhPolyfill.init();
+});
+onBeforeUnmount(() => {
+  FixedVhPolyfill.cleanup();
+});
+</script>
+
+<template>
+  <div class="fullscreen">
+    <!-- ... -->
+  </div>
+</template>
+```
+
+> 💡 **Works perfectly in SPAs!**  
+> Just call `init()` when your component mounts and `cleanup()` when it unmounts to avoid memory leaks.
 
 ---
 
@@ -191,11 +275,32 @@ The available CSS custom properties depend on your browser's viewport unit suppo
 - **`--lvh`** (Large Viewport Height): Use when you want content to fit the **full available space** when browser UI is hidden (typically after scrolling down)
 - **`--svh`** (Small Viewport Height): Use when you want content to **always be visible** even when browser UI is shown (initial page load, scrolling up)
 
+### Which Unit Should I Use?
 
+| Unit | When to Use | Best For |
+|------|-------------|----------|
+| `--fvh` | General stable height | Main content, hero sections |
+| `--lvh` | Maximum available space | Fullscreen modals, galleries |
+| `--svh` | Always visible content | Navigation, forms, CTAs |
 
 ## 🐞 Debug Mode
 
 When `debugMode` is set to `true` in the configuration, a small, draggable element will be added to the bottom-right of the screen. This element displays the real-time internal state of the polyfill, which is useful for visually confirming how the polyfill is operating on a target device.
+
+Enable overlay debug UI:
+```javascript
+FixedVhPolyfill.init({ debugMode: true });
+```
+
+
+### Performance Impact
+- **Lazy Detection**: Only 5 measurements needed
+- **Debounced Updates**: 200ms debouncing prevents excessive updates  
+- **Auto-Cleanup**: Removes listeners when not needed
+- **Memory Efficient**: Uses requestAnimationFrame for smooth updates
+
+---
+---
 
 ## 🤝 License
 
