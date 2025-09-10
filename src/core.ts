@@ -206,7 +206,7 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
     const state = this.state;
     if (state.isDetectionComplete) return;
 
-    const MAX_DETECTIONS = 10;
+    const MAX_DETECTIONS = 5;
     const currentLvh = Utils.toPx("1lvh");
     const currentSvh = Utils.toPx("1svh");
 
