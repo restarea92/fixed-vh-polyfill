@@ -30,7 +30,6 @@ const handlers: Handlers = {
 		FixedVhPolyfill.refreshDimensions(true);
 		const currentLvh = Utils.toPx('1lvh');
 		const currentSvh = Utils.toPx('1svh');
-		const currentFvh = Utils.toPx('1vh');
 		state.lvhMeasurements.push(currentLvh);
 		state.svhMeasurements.push(currentSvh);
 	},
