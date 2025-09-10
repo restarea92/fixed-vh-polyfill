@@ -1,5 +1,5 @@
 import type { FixedVhPolyfillInstance, FixedVhPolyfillState, Handlers, FixedVhPolyfillOptions } from './types';
-import { toPx } from './utils';
+import { Utils, toPx } from './utils';
 
 /**
  * Debounce times in milliseconds for various events.
@@ -23,14 +23,15 @@ const DEBOUNCE_MS = {
  *   event fires but `window.innerWidth` remains the same. This triggers only "safe" updates to `lvh` and `svh`
  *   to prevent layout jank, while preserving the user's scroll state.
  */
+
 const handlers: Handlers = {
 	load: () => {
 		const state = FixedVhPolyfill.state;
 		state.currentWidth = window.innerWidth; // Save initial width
 		FixedVhPolyfill.refreshDimensions(true);
-		const currentLvh = toPx('1lvh');
-		const currentSvh = toPx('1svh');
-		const currentFvh = toPx('1vh');
+		const currentLvh = Utils.toPx('1lvh');
+		const currentSvh = Utils.toPx('1svh');
+		const currentFvh = Utils.toPx('1vh');
 		state.lvhMeasurements.push(currentLvh);
 		state.svhMeasurements.push(currentSvh);
 		document.documentElement.style.setProperty(state.fvhPropertyName, `${currentFvh}px`);
@@ -169,9 +170,9 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 	 * @returns void
 	 */
 	updateViewportHeight(force = false) {
-		const newFvh = toPx('1vh');
-		const newLvh = toPx('1lvh');
-		const newSvh = toPx('1svh');
+		const newFvh = Utils.toPx('1vh');
+		const newLvh = Utils.toPx('1lvh');
+		const newSvh = Utils.toPx('1svh');
 
 		const setVar = (property: string, value: number) => {
 			document.documentElement.style.setProperty(property, `${value}px`);
@@ -268,8 +269,8 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		if (state.isDetectionComplete) return;
 
 		const MAX_DETECTIONS = 10;
-		const currentLvh = toPx('1lvh');
-		const currentSvh = toPx('1svh');
+		const currentLvh = Utils.toPx('1lvh');
+		const currentSvh = Utils.toPx('1svh');
 
 		state.lvhMeasurements.push(currentLvh);
 		state.svhMeasurements.push(currentSvh);
