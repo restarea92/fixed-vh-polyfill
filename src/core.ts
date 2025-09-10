@@ -30,7 +30,7 @@ export const state: FixedVhPolyfillState = {
   fvh: 0,
   lvh: 0,
   svh: 0,
-  currentWidth: 0, // 너비 상태 추가
+  currentWidth: 0,
 
   fvhPropertyName: "--fvh",
   lvhPropertyName: "--lvh",
