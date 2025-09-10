@@ -13,20 +13,20 @@ let cachedVirtualElement: HTMLElement | null = null;
  * @returns {HTMLElement} The cached or newly created virtual element.
  * @example
  * const element = createVirtualElement();
- */	
+ */
 const createVirtualElement = (): HTMLElement => {
-	if (cachedVirtualElement) {
-		return cachedVirtualElement;
-	}
-	
-	const virtualElement = document.createElement('div');
-	virtualElement.id = 'stable-scroll-virtual-element';
-	virtualElement.style.cssText = `
+  if (cachedVirtualElement) {
+    return cachedVirtualElement;
+  }
+
+  const virtualElement = document.createElement("div");
+  virtualElement.id = "stable-scroll-virtual-element";
+  virtualElement.style.cssText = `
 		position:absolute;top:0;left:0;width:0;height:0;pointer-events:none;content-visibility:hidden;
 	`;
-	document.body.appendChild(virtualElement);
-	cachedVirtualElement = virtualElement;
-	return virtualElement;
+  document.body.appendChild(virtualElement);
+  cachedVirtualElement = virtualElement;
+  return virtualElement;
 };
 
 /**
@@ -39,20 +39,24 @@ const createVirtualElement = (): HTMLElement => {
  * @example
  * const px = toPx('1lvh', 'computed', true);
  */
-const toPx = (cssValue: string, method: 'computed' | 'offsetHeight' = 'computed', isInt: boolean = false): number => {
-	if (!document.body) return 0;
-	const virtualElement = createVirtualElement();
-	virtualElement.style.height = cssValue;
-	// Get the height using the specified method
-	let value: number;
-	if (method === 'computed') {
-		value = parseFloat(getComputedStyle(virtualElement).height);
-		return isInt ? Math.round(value * 10) / 10 : value;
-	} else {
-		return virtualElement.offsetHeight;
-	}
+const toPx = (
+  cssValue: string,
+  method: "computed" | "offsetHeight" = "computed",
+  isInt: boolean = false,
+): number => {
+  if (!document.body) return 0;
+  const virtualElement = createVirtualElement();
+  virtualElement.style.height = cssValue;
+  // Get the height using the specified method
+  let value: number;
+  if (method === "computed") {
+    value = parseFloat(getComputedStyle(virtualElement).height);
+    return isInt ? Math.round(value * 10) / 10 : value;
+  } else {
+    return virtualElement.offsetHeight;
+  }
 };
 
 export const Utils = {
-    toPx,
+  toPx,
 };
