@@ -1,6 +1,7 @@
 import type { FixedVhPolyfillInstance, Handlers, DebounceTimes, FixedVhPolyfillState, FixedVhPolyfillOptions } from './types';
 import { Utils } from './utils';
 import { createHandlers } from './handlers';
+import { debugContainerHTML, statusHTMLTemplate } from './templates';
 
 /**
  * Debounce times in milliseconds for various events.
@@ -264,6 +265,7 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		this._checkIfModuleIsNeeded(true);
 		if (options.debugMode) {
 			this.setStateProxy();
+			handlers = createHandlers(this); // Recreate handlers with the current instance.
 			this.debug();
 		}
 	},
@@ -304,73 +306,10 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 	},
 
 	createDebugContainer() {
-		const containerHTML = `
-		    <div id="log-container" class="hide">
-				<h4 style="margin-top:1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">State</h4>
-				<div id="status" style="display: flex; flex-direction: column; font-size: 0.6rem; margin-top: 0.5rem; gap: 0.2rem; background: rgba(255, 255, 255, 0.25); padding: 0.5rem; border-radius: 5px;">
-					<span>isModuleNeeded: ${this.state.isModuleNeeded}</span>
-					<span>isDetectionComplete: ${this.state.isDetectionComplete}</span>
-					<span>isTouching: ${this.state.isTouching}</span>
-					<span>isTouchScrolling: ${this.state.isTouchScrolling}</span>
-					<span>isScrolling: ${this.state.isScrolling}</span>
-					<span>fvh: ${this.state.fvh}</span>
-					<span>lvh: ${this.state.lvh}</span>
-					<span>svh: ${this.state.svh}</span>
-				</div>
-				<h4 style="margin-top:1rem; margin-bottom: 0.5rem; border-bottom: 1px solid #555; padding-bottom: 0.25rem;">Log</h4>
-				<ul id="log-list" style="flex-grow: 1; overflow-y: auto; padding-right: 0.5rem; display:flex; flex-direction:column;"></ul>
-				<button id="local-storage-clear-btn"">Clear localStorage</button>
-				<button id="close-log-btn">Close</button>
-				<button id="open-log-btn">Debug Log</button>
-			</div>
-			
-			<style>
-				#log-container {
-					position: fixed; bottom: 1rem; right: 1rem; background: rgba(0,0,0,0.8); color: white; padding: 1rem; border-radius: 10px; font-size: 0.5rem; z-index: 1000; width: 50%; height: calc(75 * var(--svh, 1vh)); overflow-x: clip; overflow-y: auto; font-family: monospace; display: flex; flex-direction: column; word-break: keep-all; display :flex; flex-direction: column;
-					button { background: #555; color: white; cursor: pointer;  font-size: 0.5rem; }
-					button#close-log-btn { position:absolute; top: 0.5rem; right: 0.5rem; padding: 0.25rem 0.5rem; font-size: 0.5rem; border: none; border-radius: 5px; background: #555; color: white; cursor: pointer;}
-					button#open-log-btn { background: transparent; display:none; position:absolute; top:0; left:0; width:100%; height:100%; align-items: center; justify-content: center;}
-					button#local-storage-clear-btn { padding: 0.25rem 0.5rem;border: none; border-radius: 5px; }
-					&.hide {
-					 overflow-y: hidden;
-					 width: 20ch; height: 2rem; padding: 0; border-radius: 0.5rem;
-					 > * { opacity: 0; padding: 0; margin: 0; height: 0; width:0; overflow: hidden; overflow-y: hidden; }
-					 > button#open-log-btn { display: flex; opacity: 1;  position: absolute; top: 0; right: 0; width: 100%; height: 100%; border-radius: 50%; word-break: keep-all; }
-					}
-				}
-			</style>
-		`;
+		const containerHTML = debugContainerHTML;
 		if (!document.getElementById('log-container')) {
 			document.body.insertAdjacentHTML('beforeend', containerHTML);
 		}
-
-		const clearBtn = document.getElementById('local-storage-clear-btn');
-		const closeBtn = document.getElementById('close-log-btn');
-		const openBtn = document.getElementById('open-log-btn');
-		const logContainer = document.getElementById('log-container');
-
-		if (closeBtn) {
-			closeBtn.addEventListener('click', () => {
-				const logContainer = document.getElementById('log-container');
-				if (logContainer) {
-					logContainer.classList.add('hide');
-				}
-			});
-		}
-
-		if (clearBtn) {
-			clearBtn.addEventListener('click', () => {
-				window.localStorage.removeItem('fixedVhPolyfill_isModuleNeeded');
-				window.location.reload();
-			});
-		}
-
-		openBtn?.addEventListener('click', () => {
-			if (logContainer?.classList.contains('hide')) {
-				logContainer?.classList.remove('hide');
-			}
-		});
-
 	},
 
 	log(message: string) {
@@ -384,19 +323,19 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 
 	setStateProxy() {
 		const selectedProp = 'detectionCount';
+		const renderStatusHTML = (state: FixedVhPolyfillState) => {
+			let html = statusHTMLTemplate;
+			Object.keys(state).forEach((key) => {
+				const value = (state as any)[key];
+				html = html.replace(new RegExp(`{{${key}}}`, 'g'), String(value));
+			});
+			return html;
+		}
+
 		const updateStatus = () => {
 			const status = document.getElementById('status');
 			if (status) {
-				status.innerHTML = `
-					<span>isModuleNeeded: ${this.state.isModuleNeeded}</span>
-					<span>isDetectionComplete: ${this.state.isDetectionComplete}</span>
-					<span>isTouching: ${this.state.isTouching}</span>
-					<span>isTouchScrolling: ${this.state.isTouchScrolling}</span>
-					<span>isScrolling: ${this.state.isScrolling}</span>
-					<span>fvh: ${this.state.fvh}</span>
-					<span>lvh: ${this.state.lvh}</span>
-					<span>svh: ${this.state.svh}</span>
-				`;
+				status.innerHTML = renderStatusHTML(this.state);
 			}
 		};
 		const stateProxy = new Proxy(this.state, {
@@ -414,17 +353,28 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		this.state = stateProxy;
 	},
 
-	debug() {
-		this.createDebugContainer();
-		// proxy state
-		const selectedProp = 'detectionCount';
-		window.addEventListener('load', () => {
-			this.log(` [${new Date().toLocaleTimeString()}] Debug mode initialized.`);
-			this.log(` needModule: ${this.state.isModuleNeeded}`);
-			this.log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
-			this.log(` svhMeasurements: [${this.state.svhMeasurements}]`);
-		});
-	}
+debug() {
+    this.createDebugContainer();
+
+    const logContainer = document.getElementById('log-container');
+    const clearBtn = document.getElementById('local-storage-clear-btn');
+    const closeBtn = document.getElementById('close-log-btn');
+    const openBtn = document.getElementById('open-log-btn');
+
+    closeBtn?.addEventListener('click', () => logContainer?.classList.add('hide'));
+    clearBtn?.addEventListener('click', () => {
+        window.localStorage.removeItem('fixedVhPolyfill_isModuleNeeded');
+        window.location.reload();
+    });
+    openBtn?.addEventListener('click', () => logContainer?.classList.remove('hide'));
+
+    window.addEventListener('load', () => {
+        this.log(` [${new Date().toLocaleTimeString()}] Debug mode initialized.`);
+        this.log(` needModule: ${this.state.isModuleNeeded}`);
+        this.log(` lvhMeasurements: [${this.state.lvhMeasurements}]`);
+        this.log(` svhMeasurements: [${this.state.svhMeasurements}]`);
+    });
+}
 };
 
-const handlers: Handlers = createHandlers(FixedVhPolyfill);
+let handlers: Handlers = createHandlers(FixedVhPolyfill);

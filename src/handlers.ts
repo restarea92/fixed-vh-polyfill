@@ -5,52 +5,58 @@ export const createHandlers = (instance: FixedVhPolyfillInstance): Handlers => {
     const DEBOUNCE_MS = instance.DEBOUNCE_MS;
     return {
         load: () => {
-            instance.state.currentWidth = window.innerWidth;
+            const state = instance.state;
+            state.currentWidth = window.innerWidth;
             instance.refreshDimensions(true);
             const currentLvh = Utils.toPx('1lvh');
             const currentSvh = Utils.toPx('1svh');
-            instance.state.lvhMeasurements.push(currentLvh);
-            instance.state.svhMeasurements.push(currentSvh);
+            state.lvhMeasurements.push(currentLvh);
+            state.svhMeasurements.push(currentSvh);
         },
         scroll: () => {
-            if (instance.state.scrollTimeout) clearTimeout(instance.state.scrollTimeout);
-            if (instance.state.touchScrollTimeout) clearTimeout(instance.state.touchScrollTimeout);
-            instance.state.isScrolling = true;
+            const state = instance.state;
+            if (state.scrollTimeout) clearTimeout(state.scrollTimeout);
+            if (state.touchScrollTimeout) clearTimeout(state.touchScrollTimeout);
+            state.isScrolling = true;
 
-            if (instance.state.isTouching) {
-                instance.state.isTouchScrolling = true;
+            if (state.isTouching) {
+                state.isTouchScrolling = true;
             } else {
-                instance.state.touchScrollTimeout = window.setTimeout(() => {
-                    instance.state.isTouchScrolling = false;
+                state.touchScrollTimeout = window.setTimeout(() => {
+                    state.isTouchScrolling = false;
                 }, DEBOUNCE_MS.TOUCH_SCROLL_END);
             }
-            instance.state.scrollTimeout = window.setTimeout(() => {
+            state.scrollTimeout = window.setTimeout(() => {
                 instance._measureAndCheck();
-                instance.state.isScrolling = false;
+                state.isScrolling = false;
             }, DEBOUNCE_MS.SCROLL_END);
         },
         touchStart: () => {
-            if (instance.state.touchScrollTimeout) clearTimeout(instance.state.touchScrollTimeout);
-            instance.state.isTouching = true;
+            const state = instance.state;
+            if (state.touchScrollTimeout) clearTimeout(state.touchScrollTimeout);
+            state.isTouching = true;
         },
         touchEnd: () => {
-            if (instance.state.touchScrollTimeout) clearTimeout(instance.state.touchScrollTimeout);
-            instance.state.isTouching = false;
-            instance.state.touchScrollTimeout = window.setTimeout(() => {
-                instance.state.isTouchScrolling = false;
+            const state = instance.state;
+            if (state.touchScrollTimeout) clearTimeout(state.touchScrollTimeout);
+            state.isTouching = false;
+            state.touchScrollTimeout = window.setTimeout(() => {
+                state.isTouchScrolling = false;
             }, DEBOUNCE_MS.TOUCH_SCROLL_END);
         },
         resize: () => {
+            const state = instance.state;
             const newWidth = window.innerWidth;
-            if (newWidth !== instance.state.currentWidth) {
-                instance.state.currentWidth = newWidth;
+            if (newWidth !== state.currentWidth) {
+                state.currentWidth = newWidth;
                 instance.refreshDimensions(true);
             } else {
                 instance.refreshDimensions(false);
             }
         },
         orientation: () => {
-            instance.state.currentWidth = window.innerWidth;
+            const state = instance.state;
+            state.currentWidth = window.innerWidth;
             instance.refreshDimensions(true);
         },
     };
