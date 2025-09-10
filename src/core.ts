@@ -4,14 +4,14 @@ import { Utils } from './utils';
 /**
  * Debounce times in milliseconds for various events.
  * These values are crucial for determining the 'end' of a user action and preventing event storms.
- * - `SCROLL_END` & `TOUCH_SCROLL_END` (300ms): A standard, stable value to determine when a scroll action has finished.
- * - `RESIZE` (300ms): A shorter value for a more agile response to environmental changes like device orientation or window resizing.
+ * - `SCROLL_END` & `TOUCH_SCROLL_END` (200ms): A standard, stable value to determine when a scroll action has finished.
+ * - `RESIZE` (200ms): A shorter value for a more agile response to environmental changes like device orientation or window resizing.
  */
 const DEBOUNCE_MS = {
-	SCROLL_END: 300,
-	TOUCH_END: 300,
-	TOUCH_SCROLL_END: 300,
-	RESIZE: 300,
+	SCROLL_END: 200,
+	TOUCH_END: 200,
+	TOUCH_SCROLL_END: 200,
+	RESIZE: 200,
 } as const;
 
 /**
