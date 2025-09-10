@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://github.com/restarea92/fixed-vh-polyfill/compare/v0.1.4...v0.1.5) (2025-09-10)
+
+
+### Features
+
+* **utils:** export Utils object alongside toPx for flexible imports ([ef86bf2](https://github.com/restarea92/fixed-vh-polyfill/commit/ef86bf2d0edc33f0601b2c9b49d1fd8811e9d56a))
+* **utils:** export Utils object alongside toPx for flexible imports ([1ddabb8](https://github.com/restarea92/fixed-vh-polyfill/commit/1ddabb8b9b739b5318b9f1abca4eb50ace12edbc))
+
 ### [0.1.4](https://github.com/restarea92/fixed-vh-polyfill/compare/v0.1.3...v0.1.4) (2025-09-09)
 
 
