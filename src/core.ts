@@ -1,5 +1,6 @@
-import type { FixedVhPolyfillInstance, FixedVhPolyfillState, Handlers, FixedVhPolyfillOptions } from './types';
+import type { FixedVhPolyfillInstance, Handlers, DebounceTimes, FixedVhPolyfillState, FixedVhPolyfillOptions } from './types';
 import { Utils } from './utils';
+import { createHandlers } from './handlers';
 
 /**
  * Debounce times in milliseconds for various events.
@@ -7,86 +8,12 @@ import { Utils } from './utils';
  * - `SCROLL_END` & `TOUCH_SCROLL_END` (200ms): A standard, stable value to determine when a scroll action has finished.
  * - `RESIZE` (200ms): A shorter value for a more agile response to environmental changes like device orientation or window resizing.
  */
-const DEBOUNCE_MS = {
+const DEBOUNCE_MS: DebounceTimes = {
 	SCROLL_END: 200,
 	TOUCH_END: 200,
 	TOUCH_SCROLL_END: 200,
 	RESIZE: 200,
 } as const;
-
-/**
- * Core logic for the polyfill, implemented through raw event handlers.
- * The main strategy is to differentiate between "intentional" and "unintentional" resize events.
- * - An intentional resize (e.g., device rotation, window resizing) is detected by a change in `window.innerWidth`.
- *   This triggers a full recalculation of all viewport units.
- * - An unintentional resize (e.g., browser UI appearing/disappearing during a scroll) is detected when a `resize`
- *   event fires but `window.innerWidth` remains the same. This triggers only "safe" updates to `lvh` and `svh`
- *   to prevent layout jank, while preserving the user's scroll state.
- */
-const handlers: Handlers = {
-	load: () => {
-		const state = FixedVhPolyfill.state;
-		state.currentWidth = window.innerWidth; // Save initial width
-		FixedVhPolyfill.refreshDimensions(true);
-		const currentLvh = Utils.toPx('1lvh');
-		const currentSvh = Utils.toPx('1svh');
-		state.lvhMeasurements.push(currentLvh);
-		state.svhMeasurements.push(currentSvh);
-	},
-	scroll: () => { 
-		const state = FixedVhPolyfill.state;
-		if (state.scrollTimeout) clearTimeout(state.scrollTimeout);
-		if (state.touchScrollTimeout) clearTimeout(state.touchScrollTimeout);
-		state.isScrolling = true;
-
-		if (state.isTouching) {
-			state.isTouchScrolling = true;
-		} else {
-			state.touchScrollTimeout = window.setTimeout(() => {
-				state.isTouchScrolling = false;
-			}, DEBOUNCE_MS.TOUCH_SCROLL_END);
-		}
-		state.scrollTimeout = window.setTimeout(() => {
-			FixedVhPolyfill._measureAndCheck(); 
-			state.isScrolling = false;
-		}, DEBOUNCE_MS.SCROLL_END);
-	},
-	touchStart: () => {
-		const state = FixedVhPolyfill.state;
-		if (state.touchScrollTimeout) clearTimeout(state.touchScrollTimeout);
-		state.isTouching = true;
-	},
-	
-	touchEnd: () => {
-		const state = FixedVhPolyfill.state;
-		if (state.touchScrollTimeout) clearTimeout(state.touchScrollTimeout);
-		state.isTouching = false;
-		state.touchScrollTimeout = window.setTimeout(() => {
-			state.isTouchScrolling = false;
-		}, DEBOUNCE_MS.TOUCH_SCROLL_END);
-	},
-
-	resize: () => {
-		// Handles viewport resize events, distinguishing between intentional and unintentional resizes.
-		const state = FixedVhPolyfill.state;
-		const newWidth = window.innerWidth;
-		if (newWidth !== state.currentWidth) {
-			// If the width changes, treat it as an intentional resize (e.g., device rotation, window resize).
-			state.currentWidth = newWidth;
-			FixedVhPolyfill.refreshDimensions(true);
-		} else {
-			// If the width is the same, treat it as an unintentional resize (e.g., scroll-induced).
-			FixedVhPolyfill.refreshDimensions(false);
-		}
-	},
-
-	orientation: () => {
-		// Orientation change is always considered an intentional resize.
-		const state = FixedVhPolyfill.state;
-		state.currentWidth = window.innerWidth;
-		FixedVhPolyfill.refreshDimensions(true);
-	},
-};
 
 /**
  * StableScroll instance that provides stable viewport height values
@@ -135,7 +62,7 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 	 * Current state of the FixedVhPolyfill instance
 	*/
 	state,
-
+	DEBOUNCE_MS,
 	/**
 	 * Refreshes viewport height values and updates CSS variables.
 	 * @param force - Whether to force refresh immediately without debouncing
@@ -336,6 +263,7 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		this.initEventListener();
 		this._checkIfModuleIsNeeded(true);
 		if (options.debugMode) {
+			this.setStateProxy();
 			this.debug();
 		}
 	},
@@ -454,8 +382,8 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		logList.scrollTop = logList.scrollHeight;
 	},
 
-	debug() {
-		this.createDebugContainer();
+	setStateProxy() {
+		const selectedProp = 'detectionCount';
 		const updateStatus = () => {
 			const status = document.getElementById('status');
 			if (status) {
@@ -471,9 +399,6 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 				`;
 			}
 		};
-
-		// proxy state
-		const selectedProp = 'detectionCount';
 		const stateProxy = new Proxy(this.state, {
 			set: (target, prop, value) => {
 				if (prop === selectedProp) {
@@ -487,7 +412,12 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 			}
 		});
 		this.state = stateProxy;
+	},
 
+	debug() {
+		this.createDebugContainer();
+		// proxy state
+		const selectedProp = 'detectionCount';
 		window.addEventListener('load', () => {
 			this.log(` [${new Date().toLocaleTimeString()}] Debug mode initialized.`);
 			this.log(` needModule: ${this.state.isModuleNeeded}`);
@@ -496,3 +426,5 @@ export const FixedVhPolyfill: FixedVhPolyfillInstance = {
 		});
 	}
 };
+
+const handlers: Handlers = createHandlers(FixedVhPolyfill);
