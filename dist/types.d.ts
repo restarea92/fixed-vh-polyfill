@@ -38,8 +38,16 @@ export interface FixedVhPolyfillOptions {
     svhPropertyName?: string;
     debugMode?: boolean;
 }
+export interface DebounceTimes {
+    SCROLL_END: number;
+    TOUCH_END: number;
+    TOUCH_SCROLL_END: number;
+    RESIZE: number;
+}
 export interface FixedVhPolyfillInstance {
     state: FixedVhPolyfillState;
+    DEBOUNCE_MS: DebounceTimes;
+    setStateProxy: () => void;
     refreshDimensions: (force?: boolean) => void;
     updateViewportHeight: (force?: boolean) => void;
     initEventListener: () => void;

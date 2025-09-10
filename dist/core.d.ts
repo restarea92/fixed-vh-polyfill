@@ -1,4 +1,4 @@
-import type { FixedVhPolyfillInstance, FixedVhPolyfillState } from './types';
+import type { FixedVhPolyfillInstance, FixedVhPolyfillState } from "./types";
 /**
  * StableScroll instance that provides stable viewport height values
  * and manages scroll-related state for better mobile experience
