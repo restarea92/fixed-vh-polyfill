@@ -23,7 +23,6 @@ const DEBOUNCE_MS = {
  *   event fires but `window.innerWidth` remains the same. This triggers only "safe" updates to `lvh` and `svh`
  *   to prevent layout jank, while preserving the user's scroll state.
  */
-
 const handlers: Handlers = {
 	load: () => {
 		const state = FixedVhPolyfill.state;
@@ -34,8 +33,6 @@ const handlers: Handlers = {
 		const currentFvh = Utils.toPx('1vh');
 		state.lvhMeasurements.push(currentLvh);
 		state.svhMeasurements.push(currentSvh);
-		document.documentElement.style.setProperty(state.fvhPropertyName, `${currentFvh}px`);
-		state.fvh = currentFvh;
 	},
 	scroll: () => { 
 		const state = FixedVhPolyfill.state;
