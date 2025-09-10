@@ -39,7 +39,7 @@ const createVirtualElement = (): HTMLElement => {
  * @example
  * const px = toPx('1lvh', 'computed', true);
  */
-export const toPx = (cssValue: string, method: 'computed' | 'offsetHeight' = 'computed', isInt: boolean = false): number => {
+const toPx = (cssValue: string, method: 'computed' | 'offsetHeight' = 'computed', isInt: boolean = false): number => {
 	if (!document.body) return 0;
 	const virtualElement = createVirtualElement();
 	virtualElement.style.height = cssValue;

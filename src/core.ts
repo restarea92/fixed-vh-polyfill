@@ -1,5 +1,5 @@
 import type { FixedVhPolyfillInstance, FixedVhPolyfillState, Handlers, FixedVhPolyfillOptions } from './types';
-import { Utils, toPx } from './utils';
+import { Utils } from './utils';
 
 /**
  * Debounce times in milliseconds for various events.
