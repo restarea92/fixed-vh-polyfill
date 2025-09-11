@@ -1,7 +1,7 @@
 {
   "name": "fixed-vh-polyfill",
   "version": "0.1.7",
-  "description": "A lightweight JavaScript utility to stabilize viewport height units (vh, svh, lvh) on iOS and prevent scroll jitter. Some iOS in-app browsers or non-Safari browsers may incorrectly interpret these units, causing layout issues. This module ensures consistent viewport sizing for mobile web apps affected by these quirks. (TypeScript)",
+  "description": "A lightweight JavaScript/TypeScript utility that stabilizes viewport height units (vh, svh, lvh) across browsers, preventing unintended reflows and scroll jitter.",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -35,6 +35,10 @@
   },
   "keywords": [
     "viewport",
+    "vertical-height",
+    "100vh",
+    "100svh",
+    "100lvh",
     "vh",
     "lvh",
     "svh",
