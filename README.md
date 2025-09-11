@@ -42,29 +42,29 @@ This tool provides **consistent viewport-relative unit values** for mobile web a
 
 ---
 
-## ⚡ Quickstart
+## ⚡ Quick start
 
-### Installation
+### 📦 Installation
 ```bash
 npm install fixed-vh-polyfill
 ```
 
-### Usage
+### 📝 Usage
 ```javascript
 import { FixedVhPolyfill } from 'fixed-vh-polyfill';
 document.addEventListener('DOMContentLoaded', () => FixedVhPolyfill.init());
 ```
 
-### CSS
+### 🎨 CSS
 ```css
 .fullscreen {
   height: calc(100 * var(--fvh, 1vh));
 }
 ```
 
----
+<br>
 
-## ❗ The Problem & Solution
+## 🛑 The Problem & Solution
 
 ### What's the Problem?
 - The `vh` unit is a CSS unit relative to the viewport height. However, different browsers interpret viewport height differently when UI elements like the address bar appear or disappear, which can cause unintended reflows and scroll jitter.
@@ -77,34 +77,38 @@ document.addEventListener('DOMContentLoaded', () => FixedVhPolyfill.init());
 - Prevents unintended **reflows and scroll jitter**.
 - Automatically detects whether it’s needed and enables/disables itself to avoid unnecessary resource usage.
 
----
+<br>
 
-## 💡 Why Fixed VH Polyfill?
+## 🤔 Why Fixed VH Polyfill?
 
 ### ✨ Key Features & Advantages
-- 🆕 **Supports modern units:** Unlike traditional polyfills, it ensures consistent behavior for `lvh` and `svh`, accurately reflecting your web app design intentions. For example, use `svh` to guarantee content fully fits within the viewport.
-- 🧠 **Intelligent Self-Optimization:** Measures viewport unit behavior across multiple events to determine if it’s actually needed. Once stable viewport units are detected, it automatically cleans up and stops running to save resources.
+- 🌟 **Supports modern units:** Unlike traditional polyfills, it ensures consistent behavior for `lvh` and `svh`, accurately reflecting your web app design intentions. For example, use `svh` to guarantee content fully fits within the viewport.
+- 🤖 **Intelligent Self-Optimization:** Measures viewport unit behavior across multiple events to determine if it’s actually needed. Once stable viewport units are detected, it automatically cleans up and stops running to save resources.
 - ⚡ **Resource Efficient:** Only runs when necessary, with minimal performance impact.
 - 🪶 **Lightweight:** Small footprint with zero dependencies.
-- 🧩 **Easy Integration:** Simply import and initialize—it works automatically.
-- 🎨 **Customizable:** Allows custom CSS variable names to prevent conflicts.
+- 🔌 **Easy Integration:** Simply import and initialize—it works automatically.
+- 🖌️ **Customizable:** Allows custom CSS variable names to prevent conflicts.
 - 🌐 **Broad Compatibility:** Works across all modern browsers, including mobile.
-- 🖥️ **SPA Friendly:** Provides a cleanup method to avoid memory leaks in SPA rendering environments.
+- 🪄 **SPA Friendly:** Provides a cleanup method to avoid memory leaks in SPA rendering environments.
+
+<br>
 
 ---
+
+<br>
 
 ## 🚀 Getting Started
 
-### 1. Installation
+### 📦 Installation
 
 ```bash
 npm install fixed-vh-polyfill
 ```
 
-### 2. Usage
+### 📝 Usage
 Since this polyfill interacts with the DOM, it's important to initialize it **after** the DOM is fully loaded. Wrap the `init()` call inside a `DOMContentLoaded` event listener.
 
-#### 1. Initialization Examples: 
+#### 1. Initialization Examples:
 **ESM:**
 ```javascript
 import { FixedVhPolyfill } from 'fixed-vh-polyfill';
@@ -146,6 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
 </script>
 ```
 
+<br>
+
 
 #### 2. In HTML/CSS:
 
@@ -155,50 +161,50 @@ The `1vh`, `1lvh`, or `1svh` fallback ensures your layout remains sensible if th
 
 The available CSS custom properties depend on your browser's viewport unit support:
 - `--fvh`: Available in all browsers that support `vh` units
+
+  ```css
+  .fullscreen {
+  /* fvh: Initial viewport height when page first loads */
+  height: calc(100 * var(--fvh, 1vh));
+  }
+  ```
+
 - `--lvh`, `--svh`: Available in browsers that support `lvh`/`svh` units (modern browsers)
 
-```css
-.fullscreen {
- /* fvh: Initial viewport height when page first loads
-    - If page loads with address bar visible: similar to svh value
-    - If page loads with address bar hidden: similar to lvh value
-    - Provides consistent height regardless of subsequent UI changes */
- height: calc(100 * var(--fvh, 1vh));
-}
+  ```css
+  .fullscreen.large {
+  /* lvh: Fixed large viewport height (browser UI hidden) */
+  height: calc(var(--lvh, 1lvh) * 100);
+  }
+  ```
 
-.fullscreen.large {
- /* lvh: Fixed large viewport height (browser UI hidden)
-    - Use when you want content to utilize full available space
-    - Best for immersive experiences, fullscreen modals */
- height: calc(var(--lvh, 1lvh) * 100);
-}
+  ```css
+  .fullscreen.small {
+  /* svh: Fixed small viewport height (browser UI visible) */
+  height: calc(var(--svh, 1svh) * 100);
+  }
+  ```
 
-.fullscreen.small {
- /* svh: Fixed small viewport height (browser UI visible)
-    - Use when content must always be fully visible
-    - Best for critical UI, forms, navigation */
- height: calc(var(--svh, 1svh) * 100);
-}
+**Progressive Enhancement**
+- Fallback Strategy:
 
-/* Progressive enhancement fallback strategy:
-    1. Old browsers: 100vh (basic viewport height)
-    2. Modern browsers supporting lvh/svh: 100lvh (native large viewport)
-    3. All browsers: var(--lvh) (polyfilled stable version)
-    Use this pattern for maximum browser compatibility */
-.fullscreen.fallback {
-    height: 100vh;                        /* fallback for very old browsers */
-    height: 100lvh;                       /* native lvh for modern browsers */
-    height: calc(100 * var(--lvh, 1lvh)); /* polyfilled stable version */
-}
-```
+  ```css
+  /* Use this pattern for maximum browser compatibility */
+  .fullscreen.fallback {
+      height: 100vh;                        /* fallback for very old browsers */
+      height: 100lvh;                       /* native lvh for modern browsers */
+      height: calc(100 * var(--lvh, 1lvh)); /* polyfilled stable version */
+  }
+  ```
 
 **Which Unit Should I Use?**
 - **`--fvh`** (Fixed Viewport Height = `vh`): General purpose stable viewport height, good for most use cases
 - **`--lvh`** (Large Viewport Height): Use when you want content to fit the **full available space** when browser UI is hidden (typically after scrolling down)
 - **`--svh`** (Small Viewport Height): Use when you want content to **always be visible** even when browser UI is shown (initial page load, scrolling up)
 
+<br>
 
-### 3. Advanced Usage in Frameworks
+#### 3. Advanced Usage in Frameworks
 **Usage with React:**
 ```jsx
 import { useEffect } from "react";
@@ -268,6 +274,8 @@ onBeforeUnmount(() => {
 > 💡 **Works perfectly in SPAs!**  
 > Just call `init()` when your component mounts and `cleanup()` when it unmounts to avoid memory leaks.
 
+<br>
+
 ## ⚙️ Configuration (Options)
 
 You can pass an options object to the `init()` method to customize its behavior. Here is an example with all available options:
@@ -295,7 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
 | `svhPropertyName` | `string`  | `'--svh'` | The CSS custom property for the stable "small viewport height" (`svh`).                                 |
 | `debugMode`       | `boolean` | `false`   | When `true`, displays an overlay with the polyfill's internal state for debugging.                      |
 
----
+
+<br>
 
 ## 🐞 Debug Mode
 
@@ -306,7 +315,7 @@ Enable overlay debug UI:
 FixedVhPolyfill.init({ debugMode: true });
 ```
 
---- 
+<br>
 
 ## 📈 Performance Impact
 - **Lazy Detection**: Only 5 measurements needed
@@ -314,13 +323,13 @@ FixedVhPolyfill.init({ debugMode: true });
 - **Auto-Cleanup**: Removes listeners when not needed
 - **Memory Efficient**: Uses requestAnimationFrame for smooth updates
 
----
+<br>
 
 ## 👨‍💻 Author
 - **GitHub**: [@restarea92](https://github.com/restarea92)
 - **Email**: [restarea@me.com](mailto:restarea@me.com)
 
----
+<br>
 
 ## 🤝 License
 
