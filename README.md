@@ -204,8 +204,8 @@ The available CSS custom properties depend on your browser's viewport unit suppo
 
 <br>
 
-#### 3. Advanced Usage in Frameworks
-**Usage with React:**
+#### 3. Framework Integration Examples
+**React:**
 ```jsx
 import { useEffect } from "react";
 import { FixedVhPolyfill } from "fixed-vh-polyfill";
@@ -227,7 +227,7 @@ function App() {
 export default App;
 ```
 
-or with SSR frameworks like Next.js:
+**Next.js**
 ```javascript
 import { useEffect } from 'react';
 import { FixedVhPolyfill } from 'fixed-vh-polyfill';
@@ -239,18 +239,11 @@ function App() {
     }
     return () => FixedVhPolyfill.cleanup();
   }, []);
-
-  return (
-    <div className="fullscreen">
-      {/* ... */}
-    </div>
-  );
+  return <div className="fullscreen">{/* ... */}</div>;
 }
-
-export default App;
 ```
 
-**Usage with Vuejs**
+**Vue 3**
 ```jsx
 <script setup>
 import { onMounted, onBeforeUnmount } from "vue";
