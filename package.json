@@ -52,7 +52,11 @@
     "layout shift",
     "in-app browser",
     "polyfill",
-    "typescript"
+    "typescript",
+    "vh-check",
+    "react-vh",
+    "postcss-px-to-viewport",
+    "viewport-units-buggyfill"
   ],
   "author": "Yohan Byun <restarea@me.com>",
   "license": "MIT",
