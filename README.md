@@ -29,7 +29,7 @@
 </div>
 <br>
 <div align="center">
-<a href="https://opensource.org/licenses/MIT">
+  <a href="https://opensource.org/licenses/MIT">
     <img src="https://img.shields.io/badge/license-MIT-50aaff?style=for-the-badge&logo=open-source-initiative&logoColor=f6f9ff&labelColor=424656" alt="License: MIT">
   </a>
 </div>
@@ -67,17 +67,30 @@ document.addEventListener('DOMContentLoaded', () => FixedVhPolyfill.init());
 ## 🛑 The Problem & Solution
 
 ### What's the Problem?
+
+<div align="center">
+  <img src="https://github.com/restarea92/fixed-vh-polyfill/raw/main/example.webp" alt="Demo Animation">
+  <br>
+  <p>
+    Left: Chaos / Right: Peace of Mind
+  </p>  
+  <span>
+  </span>
+</div>
+
 - The `vh` unit is a CSS unit relative to the viewport height. However, different browsers interpret viewport height differently when UI elements like the address bar appear or disappear, which can cause unintended reflows and scroll jitter.
 - On mobile devices, the viewport height can also be affected by the visibility of the keyboard, depending on the OS or browser version.
 - Since 2022, `svh` and `lvh` units were introduced to address some of these issues. Yet, some browsers still have inconsistencies. For example, while Safari on the latest iOS works correctly, certain in-app or third-party WebKit-based browsers do not reliably interpret `svh` and `lvh`.
 - Additionally, there are various edge cases across different devices and environments.
 
+<br>
+
+
+
 ### How Fixed VH Polyfill Solves This
 - Ensures **consistent values for viewport-relative units**.
 - Prevents unintended **reflows and scroll jitter**.
 - Automatically detects whether it’s needed and enables/disables itself to avoid unnecessary resource usage.
-
-<br>
 
 ## 🤔 Why Fixed VH Polyfill?
 
