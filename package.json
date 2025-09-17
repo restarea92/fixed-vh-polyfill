@@ -1,6 +1,6 @@
 {
   "name": "fixed-vh-polyfill",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A lightweight JavaScript/TypeScript utility that stabilizes viewport height units (vh, svh, lvh) across browsers, preventing unintended reflows and scroll jitter.",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",

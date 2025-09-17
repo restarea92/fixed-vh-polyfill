@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.1](https://github.com/restarea92/fixed-vh-polyfill/compare/v1.0.0...v1.0.1) (2025-09-17)
+
+
+### Features
+
+* update package.json ([c81e654](https://github.com/restarea92/fixed-vh-polyfill/commit/c81e654853ef1c89be47ff10dcff8d97ca967f5b))
+
 ## [1.0.0](https://github.com/restarea92/fixed-vh-polyfill/compare/v0.1.9...v1.0.0) (2025-09-15)
 
 ### [0.1.9](https://github.com/restarea92/fixed-vh-polyfill/compare/v0.1.8...v0.1.9) (2025-09-11)
