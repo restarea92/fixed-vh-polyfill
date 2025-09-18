@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', () => FixedVhPolyfill.init());
 ### What's the Problem?
 
 <div align="center">
-  <img src="https://github.com/restarea92/fixed-vh-polyfill/raw/main/example.webp" alt="Demo Animation">
+  <img src="https://github.com/restarea92/fixed-vh-polyfill/raw/main/example.gif" alt="Demo Animation">
   <br>
   <p>
     Left: Chaos / Right: Peace of Mind
